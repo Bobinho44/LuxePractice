@@ -1,7 +1,6 @@
 package fr.bobinho.luxepractice.utils.kit;
 
 import org.atlanmod.commons.Guards;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;

@@ -7,12 +7,22 @@ import org.bukkit.event.block.BlockPlaceEvent;
 
 public class BuildListener implements Listener {
 
+    /**
+     * Listen when a player place a block
+     *
+     * @param e the block place event
+     */
     public void onPlace(BlockPlaceEvent e) {
         if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             e.setCancelled(true);
         }
     }
 
+    /**
+     * Listen when a player break a block
+     *
+     * @param e the block break event
+     */
     public void onBreak(BlockBreakEvent e) {
         if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             e.setCancelled(true);

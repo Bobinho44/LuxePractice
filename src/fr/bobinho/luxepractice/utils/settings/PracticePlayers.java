@@ -4,25 +4,24 @@ import fr.bobinho.luxepractice.LuxePracticeCore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
-
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-public class PracticeSettings {
+public class PracticePlayers {
 
     private static YamlConfiguration configuration;
 
     /**
-     * Initializes settings file
+     * Initializes players file
      */
     public static void Initialize() {
-        File file = new File(LuxePracticeCore.getInstance().getDataFolder() + "/settings.yml");
+        File file = new File(LuxePracticeCore.getInstance().getDataFolder() + "/players.yml");
 
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            try (InputStream input = PracticeSettings.class.getResourceAsStream("/settings.yml")) {
+            try (InputStream input = PracticeSettings.class.getResourceAsStream("/players.yml")) {
                 if (input != null)
                     Files.copy(input, file.toPath());
                 else
@@ -35,7 +34,7 @@ public class PracticeSettings {
 
         configuration = YamlConfiguration.loadConfiguration(file);
 
-        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded settings");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded players data");
     }
 
     /**

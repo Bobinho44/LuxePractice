@@ -6,7 +6,15 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class CooldownListener implements Listener {
 
+    /**
+     * Listen when a player join the server to set item's cooldown
+     *
+     * @param e the player join event
+     */
     public void onJoin(PlayerJoinEvent e) {
+
+        //Sets item's cooldown
         e.getPlayer().setCooldown(Material.ENDER_PEARL, 200);
     }
+
 }

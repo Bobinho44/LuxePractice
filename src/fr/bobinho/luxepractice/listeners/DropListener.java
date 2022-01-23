@@ -8,10 +8,15 @@ import java.util.concurrent.TimeUnit;
 
 public class DropListener implements Listener {
 
+    /**
+     * Listen when an item is dropped
+     *
+     * @param e the entity drop item event
+     */
     public void onDrop(EntityDropItemEvent e) {
-        e.getItemDrop().setPickupDelay(32767);
-        PracticeScheduler.syncScheduler().after(3, TimeUnit.SECONDS).run(() ->
-                e.getItemDrop().remove()
-        );
+
+        //Sets pickup delay to 3 seconds
+        e.getItemDrop().setPickupDelay(60);
     }
+
 }

@@ -11,15 +11,26 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class ChestListener implements Listener {
 
+    /**
+     * Listen when a player open a practice chest
+     *
+     * @param e the player interact event
+     */
     public void onOpenChest(PlayerInteractEvent e) {
         Block clickedBlock = e.getClickedBlock();
         Player player = e.getPlayer();
 
+        //Checks if the clicked block is a chest
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clickedBlock != null && clickedBlock.getType() == Material.CHEST) {
+
+            //Checks if the clicked chest is a practice chest
             if (PracticeChestManager.isItPracticeChest(clickedBlock.getLocation())) {
+
+                //Opens the practice chest
                 PracticeChestManager.openPracticeChest(player, (Chest) clickedBlock);
                 e.setCancelled(true);
             }
         }
     }
+
 }

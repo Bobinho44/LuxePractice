@@ -13,18 +13,25 @@ import org.bukkit.entity.Player;
 @CommandAlias("stats")
 public class StatsCommand extends BaseCommand {
 
+    /**
+     * Command stats
+     *
+     * @param sender the sender
+     */
     @Default
     @CommandPermission("luxepractice.stats")
     public void onDefault(CommandSender sender) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPlayer(player);
+            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
 
-            String stats = ChatColor.GOLD + sender.getName() + "'s stats:\n" +
-                    ChatColor.GOLD + "Kills: " + ChatColor.YELLOW + practicePlayer.getKills() +
-                    ChatColor.GOLD + "Deaths: " + ChatColor.YELLOW + practicePlayer.getDeaths() +
-                    ChatColor.GOLD + "KDR: " + ChatColor.YELLOW + practicePlayer.getRatio();
+            //Gets player's stats
+            String stats = ChatColor.GOLD + sender.getName() + "'s stats:" + "\n" +
+                    ChatColor.GOLD + "Kills: " + ChatColor.YELLOW + practicePlayer.getKills() + "\n" +
+                    ChatColor.GOLD + "Deaths: " + ChatColor.YELLOW + practicePlayer.getDeaths() + "\n" +
+                    ChatColor.GOLD + "KDR: " + ChatColor.YELLOW + practicePlayer.getRatio() + "\n";
 
+            //Sends player's stats
             player.sendMessage(stats);
         }
     }

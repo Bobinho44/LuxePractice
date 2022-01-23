@@ -14,7 +14,7 @@ public class LocationUtil {
                 location.getPitch();
     }
 
-    public static  Location getAsLocation(String locationString) {
+    public static Location getAsLocation(String locationString) {
         String[] locationInformations = locationString.split(":");
         return new Location(
                 Bukkit.getWorld(locationInformations[0]),

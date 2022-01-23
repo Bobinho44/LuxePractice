@@ -11,26 +11,13 @@ import java.util.function.Consumer;
 
 public class PracticeScheduler {
 
-    /**
-     * Scheduler types.
-     */
-    public enum Type {
-        SYNC,
-        ASYNC;
-    }
-
     private final Type type;
-
     private int delay;
     private TimeUnit delayType;
-
     private int repeatingDelay;
     private TimeUnit repeatingDelayType;
-
     private Runnable cachedRunnable;
-
     private int bukkitTaskId = -1;
-
     private boolean shouldWait = false;
 
     /**
@@ -240,5 +227,13 @@ public class PracticeScheduler {
             else
                 Bukkit.getScheduler().runTaskAsynchronously(LuxePracticeCore.getInstance(), task);
         }
+    }
+
+    /**
+     * Scheduler types.
+     */
+    public enum Type {
+        SYNC,
+        ASYNC
     }
 }

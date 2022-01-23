@@ -1,17 +1,14 @@
 package fr.bobinho.luxepractice.utils.chest;
 
-import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import org.atlanmod.commons.Guards;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class PracticeChestManager {
 
@@ -30,7 +27,7 @@ public class PracticeChestManager {
 
         Inventory practiceChestInventory = Bukkit.createInventory(null, chest.getInventory().getSize());
 
-        for(int i = 0; i < practiceChestInventory.getSize(); i++) {
+        for (int i = 0; i < practiceChestInventory.getSize(); i++) {
             practiceChestInventory.setItem(i, chest.getInventory().getItem(i).clone());
         }
 
