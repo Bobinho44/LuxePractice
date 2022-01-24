@@ -13,7 +13,9 @@ import org.atlanmod.commons.time.Stopwatch;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TeamMatch implements PracticeMatch {
 
@@ -73,6 +75,10 @@ public class TeamMatch implements PracticeMatch {
         return winner;
     }
 
+    public void setWinner(TeamMatchResult winner) {
+        this.winner = winner;
+    }
+
     public Stopwatch getDuration() {
         return duration;
     }
@@ -106,6 +112,11 @@ public class TeamMatch implements PracticeMatch {
                 .append(getRedTeam().getMembersWithInventory())
                 .append("Match Duration: ").color(ChatColor.GOLD)
                 .insertion(DurationFormatUtils.formatDurationHMS(getDuration().elapsed().toMillis())).color(ChatColor.YELLOW).create();
+    }
+
+    @Override
+    public List<PracticePlayer> getALlMembers() {
+        return Stream.concat(getBlueTeam().getMembers().stream(), getRedTeam().getMembers().stream()).collect(Collectors.toList());
     }
 
 }
