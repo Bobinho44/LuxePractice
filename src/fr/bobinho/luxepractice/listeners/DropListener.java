@@ -1,6 +1,7 @@
 package fr.bobinho.luxepractice.listeners;
 
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDropItemEvent;
 
@@ -13,6 +14,7 @@ public class DropListener implements Listener {
      *
      * @param e the entity drop item event
      */
+    @EventHandler
     public void onDrop(EntityDropItemEvent e) {
 
         //Sets pickup delay to 3 seconds

@@ -1,12 +1,15 @@
 package fr.bobinho.luxepractice.utils.player;
 
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.atlanmod.commons.Guards;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,10 +40,8 @@ public class PracticePlayer {
         Guards.checkNotNull(uuid, "uuid is null");
         Guards.checkNotNull(name, "name is null");
         Guards.checkArgument(kills >= 0, "kills is negative");
-
         Guards.checkArgument(deaths >= 0, "deaths is negative");
         Guards.checkNotNull(kits, "kits is null");
-        Guards.checkNotNull(autoKit, "autoKit is null");
 
         this.uuid = uuid;
         this.name = name;
@@ -48,6 +49,10 @@ public class PracticePlayer {
         this.deaths = deaths;
         this.kits = kits;
         this.autoKit = autoKit;
+    }
+
+    public PracticePlayer(@Nonnull Player player) {
+        this(player.getUniqueId(), player.getName(), 0, 0, new ArrayList<PracticeKit>(), null);
     }
 
     /**
@@ -118,7 +123,7 @@ public class PracticePlayer {
      * @return the ratio
      */
     public float getRatio() {
-        return (float) getKills() / getDeaths();
+        return (float) getKills() / (getDeaths() == 0 ? 1 : getDeaths());
     }
 
     /**
@@ -185,4 +190,14 @@ public class PracticePlayer {
         this.autoKit = autoKit;
     }
 
+    /**
+     * Gets the clickable text to open the player's inventory
+     * @return the clickable text
+     */
+    @Nonnull
+    public TextComponent getClickableInventoryAccessAsString() {
+        TextComponent clickableInventoryAccess = new TextComponent(getName());
+        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory " + getName() + " " + getUuid()));
+        return clickableInventoryAccess;
+    }
 }

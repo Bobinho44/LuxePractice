@@ -4,7 +4,7 @@
     <artifactId>LuxePractice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <build>
-        <finalName>AvatarCore</finalName>
+        <finalName>LuxePractice</finalName>
         <sourceDirectory>src</sourceDirectory>
         <plugins>
             <plugin>
@@ -29,7 +29,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>LuxePracticeCore</mainClass>
+                                    <mainClass>fr.bobinho.luxepractice.LuxePracticeCore</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

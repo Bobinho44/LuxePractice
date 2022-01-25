@@ -2,6 +2,7 @@ package fr.bobinho.luxepractice.utils.arena.team;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.atlanmod.commons.Guards;
 import javax.annotation.Nonnull;

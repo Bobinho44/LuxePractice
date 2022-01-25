@@ -1,0 +1,55 @@
+name: LuxePractice
+main: fr.bobinho.luxepractice.LuxePracticeCore
+version: 0.0.1
+author: Bobinho
+api-version: 1.16
+commands:
+  match:
+    description: Match commands for LuxePractice.
+    usage: /match
+    aliases: [match, anon, anonymous]
+    permission: luxepractice.match
+  delchest:
+    description: DelChest commands for LuxePractice.
+    usage: /delchest
+    permission: luxepractice.delchest
+  setchest:
+    description: SetChest commands for LuxePractice.
+    usage: /setchest
+    permission: luxepractice.setchest
+  autokit:
+    description: AutoKit commands for LuxePractice.
+    usage: /autokit <set|remove> <name>
+    permission: luxepractice.autokit
+  delkit:
+    description: DelKit commands for LuxePractice.
+    usage: /delkit <name>
+    permission: luxepractice.delkit
+  loadkit:
+    description: LoadKit commands for LuxePractice.
+    usage: /loadkit <name>
+    permission: luxepractice.loadkit
+  savekit:
+    description: SaveKit commands for LuxePractice.
+    usage: /savekit <name>
+    permission: luxepractice.savekit
+  setkit:
+    description: SetKit commands for LuxePractice.
+    usage: /setkit <name>
+    permission: luxepractice.delchest
+  setspawn:
+    description: SetSpawn commands for LuxePractice.
+    usage: /setspawn
+    permission: luxepractice.setspawn
+  spawn:
+    description: Spawn commands for LuxePractice.
+    usage: /spawn
+    permission: luxepractice.spawn
+  stats:
+    description: Stats commands for LuxePractice.
+    usage: /stats
+    permission: luxepractice.stats
+  practiceinventory:
+    description: Inventory commands for LuxePractice.
+    usage: /practiceinventory <viewer> <streamer>
+    permission: luxepractice.practiceinventory

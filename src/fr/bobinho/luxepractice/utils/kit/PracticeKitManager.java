@@ -151,7 +151,7 @@ public class PracticeKitManager {
     public static boolean haveAutoPracticeKit(@Nonnull PracticePlayer practicePlayer) {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
 
-        return practicePlayer.getAutoKit() != null;
+        return practicePlayer.getAutoKit().isPresent();
     }
 
     public static void setAutoPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {

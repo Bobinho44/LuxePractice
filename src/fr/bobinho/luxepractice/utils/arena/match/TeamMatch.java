@@ -9,7 +9,6 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.atlanmod.commons.Guards;
-import org.atlanmod.commons.time.Stopwatch;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,14 +16,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TeamMatch implements PracticeMatch {
+public class TeamMatch extends PracticeMatch {
 
     private enum TeamMatchResult {
         BLUE("Blue Team", ChatColor.BLUE),
         RED("Red Team", ChatColor.RED);
 
-        private String name;
-        private ChatColor color;
+        private final String name;
+        private final ChatColor color;
 
         TeamMatchResult(String name, ChatColor color) {
             this.name = name;
@@ -43,35 +42,28 @@ public class TeamMatch implements PracticeMatch {
 
     private final PracticeTeam blue;
     private final PracticeTeam red;
-    private final PracticeArena arena;
     private TeamMatchResult winner;
-    private Stopwatch duration;
 
-    public TeamMatch(@Nonnull PracticeTeam blue, @Nonnull PracticeTeam red, @Nonnull PracticeArena arena) {
+    public TeamMatch(@Nonnull PracticeArena arena, @Nonnull PracticeTeam blue, @Nonnull PracticeTeam red) {
+        super(arena);
+
         Guards.checkNotNull(blue, "blue is null");
         Guards.checkNotNull(red, "red is null");
-        Guards.checkNotNull(arena, "arena is null");
 
         this.blue = blue;
         this.red = red;
-        this.arena = arena;
-        this.duration = Stopwatch.createStarted();
     }
 
-    public PracticeTeam getBlueTeam() {
+    private PracticeTeam getBlueTeam() {
         return blue;
     }
 
-    public PracticeTeam getRedTeam() {
+    private PracticeTeam getRedTeam() {
         return red;
     }
 
-    public PracticeArena getArena() {
-        return arena;
-    }
-
     @Nullable
-    public TeamMatchResult getWinner() {
+    private TeamMatchResult getWinner() {
         return winner;
     }
 
@@ -79,39 +71,46 @@ public class TeamMatch implements PracticeMatch {
         this.winner = winner;
     }
 
-    public Stopwatch getDuration() {
-        return duration;
-    }
-
     @Override
-    public BaseComponent[] getStartMessage(@Nonnull PracticePlayer receiver) {
+    public BaseComponent[] getStartMessageForFighters(@Nonnull PracticePlayer receiver) {
         Guards.checkNotNull(receiver, "receiver is null");
         Guards.checkArgument(PracticeTeamManager.hasPracticeTeam(receiver), "receiver doesn't have team");
 
         return new ComponentBuilder("Teamfight starting vs ").color(ChatColor.GOLD).bold(true)
-                .insertion(PracticeTeamManager.getPracticePlayerTeam(receiver).get().getLeader().getName()).color(ChatColor.YELLOW)
-                .insertion("'s team").color(ChatColor.GOLD).bold(true)
-                .append("Blue Team: ").color(ChatColor.BLUE).bold(true)
-                .insertion(getBlueTeam().getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", ")))
-                .append("Red Team: ").color(ChatColor.RED).bold(true)
-                .insertion(getRedTeam().getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", ")))
-                .append("The match will automatically end in ").color(ChatColor.GOLD)
-                .insertion("30").color(ChatColor.YELLOW)
-                .insertion("minutes").color(ChatColor.GOLD).create();
+                .append(PracticeTeamManager.getPracticePlayerTeam(receiver).get().getLeader().getName()).color(ChatColor.YELLOW).bold(false)
+                .append("'s team").color(ChatColor.GOLD).bold(true)
+                .append("\nBlue Team: ").color(ChatColor.BLUE).bold(true)
+                .append(getBlueTeam().getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", "))).bold(false)
+                .append("\nRed Team: ").color(ChatColor.RED).bold(true)
+                .append(getRedTeam().getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", "))).bold(false)
+                .append("\nThe match will automatically end in ").color(ChatColor.GOLD)
+                .append("30 ").color(ChatColor.YELLOW)
+                .append("minutes").color(ChatColor.GOLD).create();
     }
 
     @Override
-    public BaseComponent[] getEndMessage(@Nonnull PracticePlayer receiver) {
+    public BaseComponent[] getEndMessageForFighters(@Nonnull PracticePlayer receiver) {
         Guards.checkNotNull(receiver, "receiver is null");
         Guards.checkArgument(PracticeTeamManager.hasPracticeTeam(receiver), "receiver doesn't have team");
+        Guards.checkNotNull(getWinner(), "winner is null");
 
         return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
-                .insertion(getWinner().getName()).color(getWinner().getColor())
-                .append("Inventories (click to view): ").color(ChatColor.GOLD)
-                .append(getBlueTeam().getMembersWithInventory())
-                .append(getRedTeam().getMembersWithInventory())
-                .append("Match Duration: ").color(ChatColor.GOLD)
-                .insertion(DurationFormatUtils.formatDurationHMS(getDuration().elapsed().toMillis())).color(ChatColor.YELLOW).create();
+                .append(getWinner().getName()).color(getWinner().getColor()).bold(false)
+                .append("\nInventories (click to view): ").color(ChatColor.GOLD)
+                .append(getPracticeTeamMembersClickableInventoryAccessAsString(getBlueTeam(), TeamMatchResult.BLUE.getColor()))
+                .append(getPracticeTeamMembersClickableInventoryAccessAsString(getRedTeam(), TeamMatchResult.RED.getColor()))
+                .append("\nMatch Duration: ").color(ChatColor.GOLD)
+                .append(DurationFormatUtils.formatDurationHMS(getDuration().elapsed().toMillis())).color(ChatColor.YELLOW).create();
+    }
+
+    private BaseComponent[] getPracticeTeamMembersClickableInventoryAccessAsString(PracticeTeam practiceTeam, ChatColor color) {
+        ComponentBuilder builder = new ComponentBuilder();
+        for (PracticePlayer practicePlayer : practiceTeam.getMembers()) {
+            builder.append(practicePlayer.getClickableInventoryAccessAsString()).color(color)
+                    .append(", ").color(ChatColor.GRAY);
+        }
+        builder.removeComponent(builder.getCursor());
+        return builder.create();
     }
 
     @Override

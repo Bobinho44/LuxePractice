@@ -1,12 +1,11 @@
 package fr.bobinho.luxepractice;
 
 import co.aikar.commands.PaperCommandManager;
+import fr.bobinho.luxepractice.commands.PracticeInventoryCommand;
+import fr.bobinho.luxepractice.commands.arena.MatchCommand;
 import fr.bobinho.luxepractice.commands.chest.DelChestCommand;
 import fr.bobinho.luxepractice.commands.chest.SetChestCommand;
-import fr.bobinho.luxepractice.commands.kit.AutoKitCommand;
-import fr.bobinho.luxepractice.commands.kit.DelKitCommand;
-import fr.bobinho.luxepractice.commands.kit.LoadKitCommand;
-import fr.bobinho.luxepractice.commands.kit.SaveKitCommand;
+import fr.bobinho.luxepractice.commands.kit.*;
 import fr.bobinho.luxepractice.commands.spawn.SetSpawnCommand;
 import fr.bobinho.luxepractice.commands.spawn.SpawnCommand;
 import fr.bobinho.luxepractice.commands.StatsCommand;
@@ -32,11 +31,14 @@ public class LuxePracticeCore extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[LuxePractice] Loading the plugin...");
+
+        registerCommands();
+        registerListeners();
+
         PracticeSettings.Initialize();
         PracticePlayers.Initialize();
         PracticeArenas.Initialize();
-
-        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[LuxePractice] Loading the plugin...");
     }
 
     /**
@@ -56,6 +58,9 @@ public class LuxePracticeCore extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new ChestListener(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new BuildListener(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new ArenaListener(), this);
+
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded listeners");
     }
 
     /**
@@ -80,6 +85,15 @@ public class LuxePracticeCore extends JavaPlugin {
         commandManager.registerCommand(new DelKitCommand());
         commandManager.registerCommand(new LoadKitCommand());
         commandManager.registerCommand(new AutoKitCommand());
+        commandManager.registerCommand(new SetKitCommand());
+
+        //Register see inventory's command
+        commandManager.registerCommand(new PracticeInventoryCommand());
+
+        //Registers arena's command
+        commandManager.registerCommand(new MatchCommand());
+
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded commands");
     }
 
 }
