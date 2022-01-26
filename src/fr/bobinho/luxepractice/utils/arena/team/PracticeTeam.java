@@ -1,24 +1,49 @@
 package fr.bobinho.luxepractice.utils.arena.team;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.atlanmod.commons.Guards;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PracticeTeam {
 
-    private PracticePlayer leader;
+    private final PracticePlayer leader;
     private List<PracticePlayer> members;
+    private String name;
+    private ChatColor color;
 
     public PracticeTeam(@Nonnull PracticePlayer leader) {
         Guards.checkNotNull(leader, "leader is null");
 
         this.leader = leader;
         this.members = List.of(leader);
+    }
+
+    public void setName(@Nonnull String name) {
+        Guards.checkNotNull(name, "name is null");
+
+        this.name = name;
+    }
+
+    public void setColor(@Nonnull ChatColor color) {
+        Guards.checkNotNull(color, "color is null");
+
+        this.color = color;
+    }
+
+    @Nullable
+    public ChatColor getColor() {
+        return color;
+    }
+
+    @Nullable
+    public String getName() {
+        return name;
     }
 
     public PracticePlayer getLeader() {

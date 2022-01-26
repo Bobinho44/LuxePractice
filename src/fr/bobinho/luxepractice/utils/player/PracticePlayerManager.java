@@ -9,11 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class PracticePlayerManager {
@@ -55,7 +53,7 @@ public class PracticePlayerManager {
     public static void loadPracticePlayerData(@Nonnull UUID uuid) {
         Guards.checkNotNull(uuid, "uuid is null");
         Guards.checkArgument(!isAlreadyRegistered(uuid), "the player is already registered");
-Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + " AAAAAAAAAAAAAAAAAAAAAAAAA ");
+
         YamlConfiguration configuration = PracticePlayers.getConfiguration();
 
         //Loads player's name

@@ -4,7 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
-import fr.bobinho.luxepractice.utils.location.LocationUtil;
+import fr.bobinho.luxepractice.utils.location.PracticeLocationUtil;
 import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -25,7 +25,7 @@ public class SpawnCommand extends BaseCommand {
             Player player = (Player) sender;
 
             //Gets and teleports the player to the spawn
-            Location spawn = LocationUtil.getAsLocation(PracticeSettings.getConfiguration().getString("spawn"));
+            Location spawn = PracticeLocationUtil.getAsLocation(PracticeSettings.getConfiguration().getString("spawn"));
             player.teleport(spawn);
         }
     }

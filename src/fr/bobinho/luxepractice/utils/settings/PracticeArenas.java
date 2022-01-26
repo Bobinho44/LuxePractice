@@ -47,4 +47,13 @@ public class PracticeArenas {
         return configuration;
     }
 
+    /**
+     * Clears configuration
+     */
+    public static void clear() {
+        for (String key : getConfiguration().getKeys(false)) {
+            getConfiguration().set(key, null);
+        }
+    }
+
 }

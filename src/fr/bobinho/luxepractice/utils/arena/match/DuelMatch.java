@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DuelMatch extends PracticeMatch {
 
@@ -52,7 +54,7 @@ public class DuelMatch extends PracticeMatch {
     }
 
     @Override
-    public BaseComponent[] getStartMessageForFighters(@Nonnull PracticePlayer receiver) {
+    public BaseComponent[] getStartMessage(@Nonnull PracticePlayer receiver) {
         Guards.checkNotNull(receiver, "receiver is null");
 
         return new ComponentBuilder("Duel request accepted vs ").color(ChatColor.GOLD).bold(true)
@@ -64,7 +66,7 @@ public class DuelMatch extends PracticeMatch {
     }
 
     @Override
-    public BaseComponent[] getEndMessageForFighters(@Nonnull PracticePlayer receiver) {
+    public BaseComponent[] getEndMessage(@Nonnull PracticePlayer receiver) {
         Guards.checkNotNull(receiver, "receiver is null");
 
         return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
@@ -78,10 +80,10 @@ public class DuelMatch extends PracticeMatch {
     }
 
     @Override
-    public BaseComponent[] getEndMessageForEveryone(@Nonnull PracticePlayer receiver) {
+    public BaseComponent[] getBroadcastMessage(@Nonnull PracticePlayer receiver) {
         Guards.checkNotNull(receiver, "receiver is null");
 
-        return new ComponentBuilder("[Match] ").color(ChatColor.GOLD)
+        return new ComponentBuilder("[Duel] ").color(ChatColor.GOLD)
                 .append(getLooser().getName()).color(ChatColor.RED)
                 .append(" was defeated by ").color(ChatColor.AQUA)
                 .append(getWinner().getName()).color(ChatColor.GREEN).create();
@@ -89,7 +91,7 @@ public class DuelMatch extends PracticeMatch {
 
     @Override
     public List<PracticePlayer> getALlMembers() {
-        return List.of(getPlayer1(), getPlayer2());
+        return Stream.concat(List.of(getPlayer1(), getPlayer2()).stream(), getSpectators().stream()).collect(Collectors.toList());
     }
 
 }

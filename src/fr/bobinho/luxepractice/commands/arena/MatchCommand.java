@@ -27,7 +27,7 @@ public class MatchCommand extends BaseCommand {
             Player player = (Player) sender;
             PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
             player.sendMessage(practicePlayer.getName() + " " + practicePlayer.getKills());
-            PracticeArena arena = new PracticeArena(player.getLocation());
+            PracticeArena arena = new PracticeArena(player.getLocation(), "");
             AnonymousMatch match = new AnonymousMatch(arena, practicePlayer, practicePlayer);
             player.sendMessage(match.getStartMessage(practicePlayer));
             match.setWinner(practicePlayer);

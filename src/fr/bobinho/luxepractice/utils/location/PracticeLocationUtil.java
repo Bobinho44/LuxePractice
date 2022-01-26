@@ -3,7 +3,7 @@ package fr.bobinho.luxepractice.utils.location;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
-public class LocationUtil {
+public class PracticeLocationUtil {
 
     public static String getAsString(Location location) {
         return String.valueOf(location.getWorld()) +
