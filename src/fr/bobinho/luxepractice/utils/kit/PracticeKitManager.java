@@ -28,13 +28,13 @@ public class PracticeKitManager {
     public static boolean isAlreadyAnUsedDefaultPracticeKit(@Nonnull String defaultKitName) {
         Guards.checkNotNull(defaultKitName, "defaultKitName is null");
 
-        return getDefaultPracticetKits().stream().anyMatch(kit -> kit.getName().equals(defaultKitName));
+        return getDefaultPracticetKits().stream().anyMatch(kit -> kit.getName().equalsIgnoreCase(defaultKitName));
     }
 
-    private static Optional<DefaultPracticeKit> getDefaultPracticeKit(@Nonnull String defaultKitName) {
+    public static Optional<DefaultPracticeKit> getDefaultPracticeKit(@Nonnull String defaultKitName) {
         Guards.checkNotNull(defaultKitName, "defaultKitName is null");
 
-        return getDefaultPracticetKits().stream().filter(kit -> kit.getName().equals(defaultKitName)).findFirst();
+        return getDefaultPracticetKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(defaultKitName)).findFirst();
     }
 
     public static void createDefaultPracticeKit(@Nonnull String defaultKitName, ItemStack[] items, boolean isDefaultMainKit) {
@@ -44,6 +44,10 @@ public class PracticeKitManager {
 
         if (isDefaultMainKit) {
             getMainDefaultPracticeKit().ifPresent(kit -> kit.setMainDefaultKit(false));
+        }
+
+        if (getMainDefaultPracticeKit().isEmpty()) {
+            isDefaultMainKit = true;
         }
 
         getDefaultPracticetKits().add(new DefaultPracticeKit(defaultKitName, items, isDefaultMainKit));
@@ -64,8 +68,8 @@ public class PracticeKitManager {
         for (String defaultKitName : Objects.requireNonNull(configuration.getConfigurationSection("defaultKits")).getKeys(false)) {
 
             //Loads default kit's items
-            ItemStack[] items = new ItemStack[36];
-            for (int i = 0; i < 36; i++) {
+            ItemStack[] items = new ItemStack[40];
+            for (int i = 0; i < 40; i++) {
                 items[i] = configuration.getItemStack("defaultKits." + defaultKitName + "." + i, null);
             }
 
@@ -84,7 +88,7 @@ public class PracticeKitManager {
         for (DefaultPracticeKit defaultKit : getDefaultPracticetKits()) {
 
             //Saves default kit's items
-            for (int i = 0; i < 36; i++) {
+            for (int i = 0; i < 40; i++) {
                 configuration.set("defaultKits." + defaultKit.getName() + "." + i, defaultKit.getItem(i));
             }
 
@@ -103,7 +107,7 @@ public class PracticeKitManager {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
         Guards.checkNotNull(kitName, "kitName is null");
 
-        return practicePlayer.getKits().stream().anyMatch(kit -> kit.getName().equals(kitName));
+        return practicePlayer.getKits().stream().anyMatch(kit -> kit.getName().equalsIgnoreCase(kitName));
     }
 
     public static void createPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
@@ -131,8 +135,8 @@ public class PracticeKitManager {
     public static ItemStack[] getPlayerInventoryAsKit(@Nonnull PracticePlayer practicePlayer) {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
 
-        ItemStack[] items = new ItemStack[36];
-        for (int i = 0; i < 36; i++) {
+        ItemStack[] items = new ItemStack[40];
+        for (int i = 0; i < 40; i++) {
             items[i] = practicePlayer.getSpigotPlayer().get().getInventory().getItem(i).clone();
         }
         return items;
@@ -143,8 +147,17 @@ public class PracticeKitManager {
         Guards.checkNotNull(kitName, "kitName is null");
         Guards.checkArgument(isAlreadyAnUsedPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
 
-        for (int i = 0; i < 36; i++) {
+        for (int i = 0; i < 40; i++) {
             practicePlayer.getSpigotPlayer().get().getInventory().setItem(i, practicePlayer.getKit(kitName).get().getItem(i));
+        }
+    }
+
+    public static void givePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull PracticeKit practiceKit) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkNotNull(practiceKit, "practiceKit is null");
+
+        for (int i = 0; i < 40; i++) {
+            practicePlayer.getSpigotPlayer().get().getInventory().setItem(i, practiceKit.getItem(i));
         }
     }
 

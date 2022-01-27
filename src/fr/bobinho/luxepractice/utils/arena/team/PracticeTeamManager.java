@@ -28,4 +28,25 @@ public class PracticeTeamManager {
         return getPracticeTeams().stream().filter(team -> team.getMembers().contains(practicePlayer)).findFirst();
     }
 
+    public static void createPracticeTeam(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkArgument(!hasPracticeTeam(practicePlayer), "practicePlayer has already a practice team");
+
+        getPracticeTeams().add(new PracticeTeam(practicePlayer));
+    }
+
+    public static void deletePracticeTeam(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkArgument(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+
+        getPracticeTeams().remove(getPracticePlayerTeam(practicePlayer).get());
+    }
+
+    public static void leavePracticeTeam(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkArgument(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+
+       getPracticePlayerTeam(practicePlayer).get().removeMember(practicePlayer);
+    }
+
 }

@@ -9,6 +9,24 @@ commands:
     usage: /match
     aliases: [match, anon, anonymous]
     permission: luxepractice.match
+  duel:
+    description: Duel commands for LuxePractice.
+    usage: /duel <player>
+    aliases: [match, 1vs1]
+    permission: luxepractice.duel
+  delarena:
+    description: DelArena commands for LuxePractice.
+    usage: /delarena <name>
+    permission: luxepractice.delarena
+  setarena:
+    description: SetArena commands for LuxePractice.
+    usage: /setarena <name>
+    permission: luxepractice.setarena
+  spectate:
+    description: Spectate commands for LuxePractice.
+    usage: /spectate <name>
+    aliases: [spectate, spec]
+    permission: luxepractice.spectate
   delchest:
     description: DelChest commands for LuxePractice.
     usage: /delchest

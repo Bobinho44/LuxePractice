@@ -29,8 +29,23 @@ public class PracticeMatchManager {
 
         return getMatchs().stream().filter(match -> match.getALlMembers().contains(practicePlayer)).findFirst();
     }
+
+    public static void createPracticeMatch(@Nonnull PracticeMatch practiceMatch) {
+        Guards.checkNotNull(practiceMatch, "practiceMatch is null");
+        Guards.checkArgument(!getMatchs().contains(practiceMatch), "this match is already created");
+
+        getMatchs().add(practiceMatch);
+    }
+
+    public static void deletePracticeMatch(@Nonnull PracticeMatch practiceMatch) {
+        Guards.checkNotNull(practiceMatch, "practiceMatch is null");
+        Guards.checkArgument(getMatchs().contains(practiceMatch), "this match doesn't exist");
+
+        getMatchs().remove(practiceMatch);
+    }
+
     public static boolean isInMatch(@Nonnull PracticePlayer practicePlayer) {
-        return getMatchs().stream().anyMatch(match -> match.getALlMembers().contains(practicePlayer));
+        return getMatchs().stream().anyMatch(match -> match.getALlMembers().contains(practicePlayer) && match.isStarted());
     }
 
     public static List<PracticeArena> getUsedPracticeArenas() {
@@ -63,6 +78,13 @@ public class PracticeMatchManager {
             }
         }
         practiceViewer.getSpigotPlayer().get().setAllowFlight(true);
+    }
+
+    public static void addOldFighterAsSpectator(@Nonnull PracticePlayer practiceViewer) {
+        Guards.checkNotNull(practiceViewer, "practiceViewer is null");
+        Guards.checkArgument(isInMatch(practiceViewer), "practiceViewer is already in a match");
+
+        addSpectator(practiceViewer, practiceViewer);
     }
 
     public static void removeSpectator(@Nonnull PracticePlayer practiceViewer) {

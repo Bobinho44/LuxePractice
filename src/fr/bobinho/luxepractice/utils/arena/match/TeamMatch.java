@@ -76,9 +76,7 @@ public class TeamMatch extends PracticeMatch {
     }
 
     @Override
-    public BaseComponent[] getEndMessage(@Nonnull PracticePlayer receiver) {
-        Guards.checkNotNull(receiver, "receiver is null");
-        Guards.checkArgument(PracticeTeamManager.hasPracticeTeam(receiver), "receiver doesn't have team");
+    public BaseComponent[] getEndMessage() {
         Guards.checkNotNull(getLooser(), "looser is null");
         Guards.checkNotNull(getWinner(), "winner is null");
 
@@ -92,8 +90,7 @@ public class TeamMatch extends PracticeMatch {
     }
 
     @Override
-    public BaseComponent[] getBroadcastMessage(@Nonnull PracticePlayer receiver) {
-        Guards.checkNotNull(receiver, "receiver is null");
+    public BaseComponent[] getBroadcastMessage() {
         Guards.checkNotNull(getLooser(), "looser is null");
         Guards.checkNotNull(getWinner(), "winner is null");
 
@@ -116,6 +113,21 @@ public class TeamMatch extends PracticeMatch {
     @Override
     public List<PracticePlayer> getALlMembers() {
         return Stream.of(getBlueTeam().getMembers().stream(), getRedTeam().getMembers().stream(), getSpectators().stream()).flatMap(i -> i).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
+    public void start() {
+        super.start();
+    }
+
+    @Override
+    public void end() {
+
     }
 
 }

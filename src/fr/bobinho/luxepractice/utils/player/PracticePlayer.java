@@ -5,14 +5,13 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.atlanmod.commons.Guards;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class PracticePlayer {
 
@@ -124,6 +123,27 @@ public class PracticePlayer {
      */
     public float getRatio() {
         return (float) getKills() / (getDeaths() == 0 ? 1 : getDeaths());
+    }
+
+    /**
+     * Teleports the player in a radius of 10 blocks around the location
+     * @param location the location
+     */
+    public void teleportAroundLocation(@Nonnull Location location) {
+        Guards.checkNotNull(location, "location is null");
+
+        //Teleports the player around the location (radius of 10 blocks)
+        Random random = new Random();
+        getSpigotPlayer().get().teleport(location.clone().add(random.nextInt(10), 0, random.nextInt(10)).toHighestLocation());
+    }
+
+    /**
+     * Removes the player potion effects
+     */
+    public void removeAllPotionEffects() {
+        for (PotionEffect effect : getSpigotPlayer().get().getActivePotionEffects()) {
+            getSpigotPlayer().get().removePotionEffect(effect.getType());
+        }
     }
 
     /**

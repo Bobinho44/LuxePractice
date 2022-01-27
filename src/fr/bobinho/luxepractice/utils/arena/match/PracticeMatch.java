@@ -14,7 +14,9 @@ public abstract class PracticeMatch {
 
     private final PracticeArena arena;
     private final List<PracticePlayer> spectators;
+    private final List<PracticePlayer> deathPracticePlayers;
     private final Stopwatch duration;
+    private boolean isStarted;
 
     protected PracticeMatch(@Nonnull PracticeArena arena) {
         Guards.checkNotNull(arena, "arena is null");
@@ -22,6 +24,34 @@ public abstract class PracticeMatch {
         this.arena = arena;
         this.duration = Stopwatch.createStarted();
         this.spectators = new ArrayList<PracticePlayer>();
+        this.deathPracticePlayers = new ArrayList<PracticePlayer>();
+
+        PracticeMatchManager.createPracticeMatch(this);
+    }
+
+    public List<PracticePlayer> getDeathPracticePlayers() {
+        return deathPracticePlayers;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
+    }
+
+    public void addDeathPracticePlayers(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkArgument(!isDeadFighter(practicePlayer), "practicePlayer is already dead");
+
+        getDeathPracticePlayers().add(practicePlayer);
+        PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
+        if (isFinished()) {
+            end();
+        }
+    }
+
+    public boolean isDeadFighter(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+
+        return getDeathPracticePlayers().contains(practicePlayer);
     }
 
     public List<PracticePlayer> getSpectators() {
@@ -58,10 +88,18 @@ public abstract class PracticeMatch {
 
     public abstract BaseComponent[] getStartMessage(@Nonnull PracticePlayer receiver);
 
-    public abstract BaseComponent[] getEndMessage(@Nonnull PracticePlayer receiver);
+    public abstract BaseComponent[] getEndMessage();
 
-    public abstract BaseComponent[] getBroadcastMessage(@Nonnull PracticePlayer receiver);
+    public abstract BaseComponent[] getBroadcastMessage();
 
     public abstract List<PracticePlayer> getALlMembers();
+
+    public abstract boolean isFinished();
+
+    public void start() {
+        isStarted = true;
+    }
+
+    public abstract void end();
 
 }

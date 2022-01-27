@@ -40,7 +40,7 @@ public class PracticeArenaManager {
     private static Optional<PracticeArena> getArena(@Nonnull String arenaName) {
         Guards.checkNotNull(arenaName, "name is null");
 
-        return getArenas().stream().filter(arena -> arena.getName().equals(arenaName)).findFirst();
+        return getArenas().stream().filter(arena -> arena.getName().equalsIgnoreCase(arenaName)).findFirst();
     }
 
     public static void deletePracticeArena(@Nonnull String arenaName) {
@@ -54,8 +54,12 @@ public class PracticeArenaManager {
         return getArena(arenaName).isPresent();
     }
 
-    private static Optional<PracticeArena> getFreePracticeArena() {
+    public static Optional<PracticeArena> getFreePracticeArena() {
         return getArenas().stream().filter(arena -> !PracticeMatchManager.getUsedPracticeArenas().contains(arena)).findFirst();
+    }
+
+    public static boolean isThereFreeArena() {
+        return getFreePracticeArena().isPresent();
     }
 
     public static void loadPracticeArenasData() {

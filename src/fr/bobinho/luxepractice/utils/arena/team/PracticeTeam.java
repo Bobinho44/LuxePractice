@@ -54,6 +54,18 @@ public class PracticeTeam {
         return members;
     }
 
+    public void addMember(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+
+        getMembers().add(practicePlayer);
+    }
+
+    public void removeMember(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+
+        getMembers().remove(practicePlayer);
+    }
+
     public String getMembersAsString() {
         return getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", "));
     }

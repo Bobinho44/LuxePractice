@@ -67,8 +67,8 @@ public class PracticePlayerManager {
         List<PracticeKit> kits = new ArrayList<PracticeKit>();
         if (configuration.getConfigurationSection(uuid + ".kits") != null) {
             for (String kitName : configuration.getConfigurationSection(uuid + ".kits").getKeys(false)) {
-                ItemStack[] items = new ItemStack[36];
-                for (int i = 0; i < 36; i++) {
+                ItemStack[] items = new ItemStack[40];
+                for (int i = 0; i < 40; i++) {
                     items[i] = configuration.getItemStack(uuid + ".kits." + kitName + "." + i);
                 }
                 kits.add(new PracticeKit(kitName, items));
@@ -77,7 +77,7 @@ public class PracticePlayerManager {
 
         //Loads player's auto kit
         PracticeKit autokit = kits.stream()
-                .filter(kit -> kit.getName().equals(configuration.getString(uuid + ".autokit")))
+                .filter(kit -> kit.getName().equalsIgnoreCase(configuration.getString(uuid + ".autokit")))
                 .findFirst().orElse(null);
 
         //Creates practice player
@@ -100,7 +100,7 @@ public class PracticePlayerManager {
 
         //Saves player's kits
         for (PracticeKit kits : practicePlayer.getKits()) {
-            for (int i = 0; i < 36; i++) {
+            for (int i = 0; i < 40; i++) {
                 configuration.set(uuid + ".kits." + kits.getName() + "." + i, kits.getItem(i));
             }
         }

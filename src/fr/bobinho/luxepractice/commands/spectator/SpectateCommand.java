@@ -37,8 +37,7 @@ public class SpectateCommand extends BaseCommand {
 
             //Checks if the selected player is in an arena
             if (PracticeMatchManager.isInMatch(practiceViewer)) {
-                viewer.sendMessage(ChatColor.RED + "You are already in an arena!");
-                return;
+                PracticeMatchManager.getMatch(practiceViewer).get().removeSpectator(practiceViewer);
             }
 
             //Creates the arena
