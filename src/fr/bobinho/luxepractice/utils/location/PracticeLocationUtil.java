@@ -6,11 +6,11 @@ import org.bukkit.Location;
 public class PracticeLocationUtil {
 
     public static String getAsString(Location location) {
-        return String.valueOf(location.getWorld()) +
-                location.getX() +
-                location.getY() +
-                location.getZ() +
-                location.getYaw() +
+        return String.valueOf(location.getWorld().getName()) + ":" +
+                location.getX() + ":" +
+                location.getY() + ":" +
+                location.getZ() + ":" +
+                location.getYaw() + ":" +
                 location.getPitch();
     }
 

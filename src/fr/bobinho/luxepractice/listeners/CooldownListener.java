@@ -1,22 +1,23 @@
 package fr.bobinho.luxepractice.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class CooldownListener implements Listener {
 
-    /**
-     * Listen when a player join the server to set item's cooldown
-     *
-     * @param e the player join event
-     */
-    @EventHandler
-    public void onJoin(PlayerJoinEvent e) {
+    /*@EventHandler
+    public void onInteract(PlayerInteractEvent e) {
 
-        //Sets item's cooldown
-        e.getPlayer().setCooldown(Material.ENDER_PEARL, 200);
-    }
+        if (e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK && e.getItem() != null && e.getItem().getType() == Material.ENDER_PEARL) {
+           if (e.getPlayer().getCooldownPeriod() != 0) return;
+
+            e.getPlayer().setCooldown(Material.ENDER_PEARL, 200);
+        }
+    }*/
 
 }

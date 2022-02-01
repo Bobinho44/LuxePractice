@@ -1,16 +1,31 @@
 package fr.bobinho.luxepractice.utils.player;
 
+import com.mojang.authlib.GameProfile;
+import fr.bobinho.luxepractice.utils.arena.request.PracticeRequest;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
+import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
+import fr.bobinho.luxepractice.utils.location.PracticeLocationUtil;
+import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_16_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
 import org.atlanmod.commons.Guards;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class PracticePlayer {
@@ -24,6 +39,7 @@ public class PracticePlayer {
     private int deaths;
     private final List<PracticeKit> kits;
     private PracticeKit autoKit;
+    private ItemStack[] oldInventory;
 
     /**
      * Creates a new practice player
@@ -134,7 +150,7 @@ public class PracticePlayer {
 
         //Teleports the player around the location (radius of 10 blocks)
         Random random = new Random();
-        getSpigotPlayer().get().teleport(location.clone().add(random.nextInt(10), 0, random.nextInt(10)).toHighestLocation());
+        getSpigotPlayer().get().teleport(location.clone().add(random.nextInt(10), 1, random.nextInt(10)).toHighestLocation());
     }
 
     /**
@@ -166,7 +182,7 @@ public class PracticePlayer {
     public Optional<PracticeKit> getKit(String kitName) {
         Guards.checkNotNull(kitName, "kitname is null");
 
-        return getKits().stream().filter(kit -> kit.getName().equals(kitName)).findFirst();
+        return getKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(kitName)).findFirst();
     }
 
     /**
@@ -217,7 +233,98 @@ public class PracticePlayer {
     @Nonnull
     public TextComponent getClickableInventoryAccessAsString() {
         TextComponent clickableInventoryAccess = new TextComponent(getName());
-        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory " + getName() + " " + getUuid()));
+        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory " + getName()));
         return clickableInventoryAccess;
     }
+
+    public void sendMessage(BaseComponent[] message) {
+        getSpigotPlayer().get().sendMessage(message);
+    }
+
+    public void sendMessage(String message) {
+        getSpigotPlayer().get().sendMessage(message);
+    }
+
+    public void addPotionEffect(PotionEffect potionEffect) {
+        getSpigotPlayer().get().addPotionEffect(potionEffect);
+    }
+
+    public void setAllowFlight(boolean allowFlight) {
+        getSpigotPlayer().get().setAllowFlight(allowFlight);
+    }
+
+    public ItemStack getItem(int slot) {
+        ItemStack item = getSpigotPlayer().get().getInventory().getItem(slot);
+        return item == null ? null : item.clone();
+    }
+
+    public void setItem(int slot, ItemStack item) {
+        getSpigotPlayer().get().getInventory().setItem(slot, item);
+    }
+
+    public void teleportToTheSpawn() {
+        //Gets and teleports the player to the spawn
+        Location spawn = PracticeLocationUtil.getAsLocation(PracticeSettings.getConfiguration().getString("spawn"));
+        getSpigotPlayer().get().teleport(spawn);
+
+        //Sends the message
+        sendMessage(ChatColor.GREEN + "Teleportation to the spawn...");
+        PracticeKitManager.givePracticeKit(this, new PracticeKit("oldInventory", getOldInventory()));
+    }
+
+    public   ItemStack[] getOldInventory() {
+        return oldInventory;
+    }
+
+    public void saveOldInventory() {
+        oldInventory = PracticeKitManager.getPlayerInventoryAsKit(this);
+    }
+
+    public void saveOldInventory(ItemStack[] items) {
+        oldInventory = items;
+    }
+
+    public void changeName(String name){
+        Player viewer = getSpigotPlayer().get();
+        for(Player player : Bukkit.getOnlinePlayers()){
+            if(player == viewer) continue ;
+            // SUPPRIME LE JOUEUR
+            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((CraftPlayer)viewer).getHandle()));
+            // MODIFIE LE PROFIL DE JEU DU JOUEUR
+            GameProfile gp = ((CraftPlayer)viewer).getProfile();
+            try {
+                Field nameField = GameProfile.class.getDeclaredField("name");
+                nameField.setAccessible(true);
+
+                nameField.set(gp, name);
+            } catch (IllegalAccessException | NoSuchFieldException ex) {
+                throw new IllegalStateException(ex);
+            }
+            //AJOUTE LE JOUEUR
+            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer)viewer).getHandle()));
+            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityDestroy(viewer.getEntityId()));
+            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutNamedEntitySpawn(((CraftPlayer)viewer).getHandle()));
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PracticePlayer)) {
+            return false;
+        }
+        PracticePlayer testedPracticePlayer = (PracticePlayer) o;
+        return testedPracticePlayer.getUuid().equals(getUuid());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUuid());
+    }
+
 }

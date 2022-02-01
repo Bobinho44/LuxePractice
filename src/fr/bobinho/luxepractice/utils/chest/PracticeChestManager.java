@@ -22,16 +22,16 @@ public class PracticeChestManager {
         return getPracticeChests().stream().anyMatch(chestLocation -> chestLocation.equals(location));
     }
 
-    public static Inventory openPracticeChest(Player player, Chest chest) {
+    public static void openPracticeChest(Player player, Chest chest) {
         Guards.checkArgument(isItPracticeChest(chest.getLocation()), "chest is not a practice chest");
 
         Inventory practiceChestInventory = Bukkit.createInventory(null, chest.getInventory().getSize());
 
         for (int i = 0; i < practiceChestInventory.getSize(); i++) {
-            practiceChestInventory.setItem(i, chest.getInventory().getItem(i).clone());
+            practiceChestInventory.setItem(i, chest.getInventory().getItem(i) != null ? chest.getInventory().getItem(i).clone() : null);
         }
 
-        return practiceChestInventory;
+        player.openInventory(practiceChestInventory);
     }
 
     public static void createPracticeChest(Location location) {

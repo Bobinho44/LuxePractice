@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
@@ -45,6 +46,17 @@ public class PracticePlayers {
     @Nonnull
     public static YamlConfiguration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * Saves configuration
+     */
+    public static void save() {
+        try {
+            getConfiguration().save(LuxePracticeCore.getInstance().getDataFolder() + "/players.yml");
+        } catch (IOException e) {
+            Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Could not save the players.yml file");
+        }
     }
 
 }

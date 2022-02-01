@@ -1,10 +1,7 @@
 package fr.bobinho.luxepractice.commands.spectator;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
@@ -22,6 +19,7 @@ public class SpectateCommand extends BaseCommand {
      * @param sender the sender
      */
     @Default
+    @Syntax("/spectate <player>")
     @CommandPermission("luxepractice.spectate")
     public void onDefault(CommandSender sender, @Single OnlinePlayer player) {
         if (sender instanceof Player) {
@@ -31,7 +29,7 @@ public class SpectateCommand extends BaseCommand {
 
             //Checks if the selected player is in an arena
             if (!PracticeMatchManager.isInMatch(practiceStreamer)) {
-                viewer.sendMessage(ChatColor.RED + practiceStreamer.getSpigotPlayer().get().getName() + "is not in an arena!");
+                viewer.sendMessage(ChatColor.RED + practiceStreamer.getName() + "is not in an arena!");
                 return;
             }
 
@@ -42,6 +40,9 @@ public class SpectateCommand extends BaseCommand {
 
             //Creates the arena
             PracticeMatchManager.addSpectator(practiceViewer, practiceStreamer);
+
+            //Sends the message
+            viewer.sendMessage(ChatColor.GREEN + "You are watching the " + practiceStreamer.getName() + "match.");
         }
     }
 

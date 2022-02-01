@@ -74,7 +74,7 @@ public class PracticeTeam {
         TextComponent base = new TextComponent();
         for (PracticePlayer player : getMembers()) {
             TextComponent playerInfo = new TextComponent(player.getName());
-            playerInfo.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory " + player.getUuid()));
+            playerInfo.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory " + player.getName()));
             base.addExtra(playerInfo);
             TextComponent separator = new TextComponent(", ");
             base.addExtra(separator);

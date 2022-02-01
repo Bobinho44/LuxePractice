@@ -1,6 +1,7 @@
 package fr.bobinho.luxepractice.utils.arena.match;
 
 import fr.bobinho.luxepractice.utils.arena.PracticeArena;
+import fr.bobinho.luxepractice.utils.format.PracticeDurationFormat;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
@@ -89,7 +90,7 @@ public class DuelMatch extends PracticeMatch {
                 .append(", ").color(ChatColor.GRAY)
                 .append(getLooser().getClickableInventoryAccessAsString()).color(ChatColor.RED)
                 .append("\nMatch Duration: ").color(ChatColor.GOLD)
-                .append(DurationFormatUtils.formatDurationHMS(getDuration().elapsed().toMillis())).color(ChatColor.YELLOW).create();
+                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed().toSeconds())).color(ChatColor.YELLOW).create();
     }
 
     @Override
@@ -105,6 +106,7 @@ public class DuelMatch extends PracticeMatch {
 
     @Override
     public List<PracticePlayer> getALlMembers() {
+        if (isEnded()) return getSpectators();
         return Stream.concat(List.of(getPlayer1(), getPlayer2()).stream(), getSpectators().stream()).collect(Collectors.toList());
     }
 
@@ -115,29 +117,41 @@ public class DuelMatch extends PracticeMatch {
 
     @Override
     public void start() {
-        super.start();
         for (PracticePlayer practicePlayer : getALlMembers()) {
+            practicePlayer.saveOldInventory();
+
             practicePlayer.teleportAroundLocation(getArena().getSpawn());
             practicePlayer.removeAllPotionEffects();
             PracticeKitManager.givePracticeKit(practicePlayer, getKit());
-            practicePlayer.getSpigotPlayer().get().sendMessage(getStartMessage(practicePlayer));
+            practicePlayer.sendMessage(getStartMessage(practicePlayer));
         }
     }
 
     @Override
     public void end() {
-        setWinner(getDeathPracticePlayers().equals(getPlayer1()) ? getPlayer2() : getPlayer1());
+        setWinner(getDeathPracticePlayers().contains(getPlayer1()) ? getPlayer2() : getPlayer1());
         for (PracticePlayer practicePlayer : getALlMembers()) {
-            if (isDeadFighter(practicePlayer)) {
+            if (!isDeadFighter(practicePlayer)) {
                 PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
             }
             practicePlayer.removeAllPotionEffects();
-            practicePlayer.getSpigotPlayer().get().sendMessage(getEndMessage());
+            practicePlayer.sendMessage(getEndMessage());
         }
 
         for (Player player : Bukkit.getOnlinePlayers().stream().filter(player -> getALlMembers().contains(PracticePlayerManager.getPracticePlayer(player.getUniqueId()))).collect(Collectors.toList())) {
             player.sendMessage(getBroadcastMessage());
         }
+        setEnd();
+    }
+
+    @Override
+    public String getMatchInfo() {
+        return ChatColor.GOLD + "Duel: " + ChatColor.GREEN + (getWinner() != null ? "Winner : " + getWinner().getName() : "Not finished");
+    }
+
+    @Override
+    public List<PracticePlayer> getFighters() {
+        return List.of(getPlayer1(), getPlayer2());
     }
 
 }

@@ -1,10 +1,7 @@
 package fr.bobinho.luxepractice.commands.kit;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
@@ -22,6 +19,7 @@ public class SaveKitCommand extends BaseCommand {
      * @param kitName the kit name
      */
     @Default
+    @Syntax("/savekit <name>")
     @CommandPermission("luxepractice.savekit")
     public void onDefault(CommandSender sender, @Single String kitName) {
         if (sender instanceof Player) {
@@ -35,7 +33,7 @@ public class SaveKitCommand extends BaseCommand {
             }
 
             //Checks if the player have less than 10 kit
-            if (PracticeKitManager.haveEmptyPracticeKitSlot(practicePlayer)) {
+            if (!PracticeKitManager.haveEmptyPracticeKitSlot(practicePlayer)) {
                 player.sendMessage(ChatColor.RED + "You already have 10 kits!");
                 return;
             }

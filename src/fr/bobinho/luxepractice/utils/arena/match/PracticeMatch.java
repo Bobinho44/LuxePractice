@@ -5,6 +5,7 @@ import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.atlanmod.commons.Guards;
 import org.atlanmod.commons.time.Stopwatch;
+import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public abstract class PracticeMatch {
     private final List<PracticePlayer> spectators;
     private final List<PracticePlayer> deathPracticePlayers;
     private final Stopwatch duration;
-    private boolean isStarted;
+    private boolean isEnded = false;
 
     protected PracticeMatch(@Nonnull PracticeArena arena) {
         Guards.checkNotNull(arena, "arena is null");
@@ -29,12 +30,16 @@ public abstract class PracticeMatch {
         PracticeMatchManager.createPracticeMatch(this);
     }
 
-    public List<PracticePlayer> getDeathPracticePlayers() {
-        return deathPracticePlayers;
+    public void setEnd() {
+        isEnded = true;
     }
 
-    public boolean isStarted() {
-        return isStarted;
+    public boolean isEnded() {
+        return isEnded;
+    }
+
+    public List<PracticePlayer> getDeathPracticePlayers() {
+        return deathPracticePlayers;
     }
 
     public void addDeathPracticePlayers(@Nonnull PracticePlayer practicePlayer) {
@@ -42,6 +47,7 @@ public abstract class PracticeMatch {
         Guards.checkArgument(!isDeadFighter(practicePlayer), "practicePlayer is already dead");
 
         getDeathPracticePlayers().add(practicePlayer);
+
         PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
         if (isFinished()) {
             end();
@@ -60,7 +66,6 @@ public abstract class PracticeMatch {
 
     public void addSpectator(@Nonnull PracticePlayer practicePlayer) {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkArgument(!PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is already in a match");
 
         getSpectators().add(practicePlayer);
     }
@@ -70,6 +75,9 @@ public abstract class PracticeMatch {
         Guards.checkArgument(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
 
         getSpectators().remove(practicePlayer);
+        if (isEnded() && getSpectators().size() == 0) {
+            PracticeMatchManager.deletePracticeMatch(this);
+        }
     }
 
     public boolean isSpectator(@Nonnull PracticePlayer practicePlayer) {
@@ -96,10 +104,12 @@ public abstract class PracticeMatch {
 
     public abstract boolean isFinished();
 
-    public void start() {
-        isStarted = true;
-    }
+    public abstract void start();
 
     public abstract void end();
+
+    public abstract String getMatchInfo();
+
+    public abstract List<PracticePlayer> getFighters();
 
 }

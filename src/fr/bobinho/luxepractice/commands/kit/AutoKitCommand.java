@@ -1,10 +1,7 @@
 package fr.bobinho.luxepractice.commands.kit;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Single;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
@@ -22,6 +19,7 @@ public class AutoKitCommand extends BaseCommand {
      * @param kitName the kit name
      */
     @Subcommand("set")
+    @Syntax("/setautokit <name>")
     @CommandPermission("luxepractice.setautokit")
     public void onSet(CommandSender sender, @Single String kitName) {
         if (sender instanceof Player) {

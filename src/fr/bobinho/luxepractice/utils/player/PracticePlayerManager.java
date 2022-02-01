@@ -40,10 +40,11 @@ public class PracticePlayerManager {
         Preconditions.requireThat(practicePlayer).isNotNull();
         Preconditions.requireThat(isAlreadyRegistered(practicePlayer.getUuid())).isFalse();
 
+        Bukkit.getConsoleSender().sendMessage("remove");
         getPracticePlayers().add(practicePlayer);
     }
 
-    private static void removePlayer(@Nonnull PracticePlayer practicePlayer) {
+    public static void removePlayer(@Nonnull PracticePlayer practicePlayer) {
         Preconditions.requireThat(practicePlayer).isNotNull();
         Preconditions.requireThat(isAlreadyRegistered(practicePlayer.getUuid())).isTrue();
 
@@ -67,8 +68,8 @@ public class PracticePlayerManager {
         List<PracticeKit> kits = new ArrayList<PracticeKit>();
         if (configuration.getConfigurationSection(uuid + ".kits") != null) {
             for (String kitName : configuration.getConfigurationSection(uuid + ".kits").getKeys(false)) {
-                ItemStack[] items = new ItemStack[40];
-                for (int i = 0; i < 40; i++) {
+                ItemStack[] items = new ItemStack[41];
+                for (int i = 0; i < 41; i++) {
                     items[i] = configuration.getItemStack(uuid + ".kits." + kitName + "." + i);
                 }
                 kits.add(new PracticeKit(kitName, items));
@@ -82,6 +83,13 @@ public class PracticePlayerManager {
 
         //Creates practice player
         addPlayer(name == null ? new PracticePlayer(Bukkit.getPlayer(uuid)) : new PracticePlayer(uuid, name, kills, deaths, kits, autokit));
+
+        //Loads old inventory
+        ItemStack[] items = new ItemStack[41];
+        for (int i = 0; i < 41; i++) {
+            items[i] = configuration.getItemStack(uuid + ".oldinventory." + i);
+        }
+        PracticePlayerManager.getPracticePlayer(uuid).saveOldInventory(items);
     }
 
     public static void savePracticePlayerData(@Nonnull UUID uuid) {
@@ -89,18 +97,19 @@ public class PracticePlayerManager {
         Guards.checkArgument(isAlreadyRegistered(uuid), "the player is not registered");
 
         YamlConfiguration configuration = PracticePlayers.getConfiguration();
+        configuration.set(uuid.toString(), null);
         PracticePlayer practicePlayer = getPracticePlayer(uuid);
 
         //Saves player's name
         configuration.set(uuid + ".name", practicePlayer.getName());
 
         //Saves player's stats
-        configuration.set(uuid + ".stats.kills", practicePlayer.getKits());
+        configuration.set(uuid + ".stats.kills", practicePlayer.getKills());
         configuration.set(uuid + ".stats.deaths", practicePlayer.getDeaths());
 
         //Saves player's kits
         for (PracticeKit kits : practicePlayer.getKits()) {
-            for (int i = 0; i < 40; i++) {
+            for (int i = 0; i < 41; i++) {
                 configuration.set(uuid + ".kits." + kits.getName() + "." + i, kits.getItem(i));
             }
         }
@@ -109,6 +118,13 @@ public class PracticePlayerManager {
         if (PracticeKitManager.haveAutoPracticeKit(practicePlayer)) {
             configuration.set(uuid + ".autokit", practicePlayer.getAutoKit().get().getName());
         }
+
+        //Saves old inventory
+        for (int i = 0; i < 41; i++) {
+            configuration.set(uuid + ".oldinventory." + i, practicePlayer.getOldInventory()[i]);
+        }
+
+        PracticePlayers.save();
     }
 
 }

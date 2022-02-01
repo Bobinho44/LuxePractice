@@ -1,9 +1,8 @@
-package fr.bobinho.luxepractice.commands;
+package fr.bobinho.luxepractice.commands.stats;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.*;
+import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import org.bukkit.ChatColor;
@@ -19,11 +18,12 @@ public class StatsCommand extends BaseCommand {
      * @param sender the sender
      */
     @Default
+    @Syntax("/stats")
     @CommandPermission("luxepractice.stats")
-    public void onDefault(CommandSender sender) {
+    public void onDefault(CommandSender sender, @Optional OnlinePlayer target) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
+            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(target == null ? player.getUniqueId() : target.player.getUniqueId());
 
             //Gets player's stats
             String stats = ChatColor.GOLD + sender.getName() + "'s stats:" + "\n" +

@@ -1,10 +1,7 @@
 package fr.bobinho.luxepractice.commands.kit;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
@@ -23,6 +20,7 @@ public class SetKitCommand extends BaseCommand {
      * @param isMainDefaultKit the kit main statue
      */
     @Default
+    @Syntax("/setkit <name> <isMainDefault = true|false>")
     @CommandPermission("luxepractice.setkit")
     public void onDefault(CommandSender sender, @Single String defaultKitName, @Single String isMainDefaultKit) {
         if (sender instanceof Player) {
@@ -34,7 +32,7 @@ public class SetKitCommand extends BaseCommand {
                 player.sendMessage(ChatColor.RED + "There is already a default kit named " + defaultKitName + "!");
                 return;
             }
-
+Boolean.parseBoolean("");
             //Creates the default kit
             PracticeKitManager.createDefaultPracticeKit(defaultKitName, PracticeKitManager.getPlayerInventoryAsKit(practicePlayer), Boolean.parseBoolean(isMainDefaultKit));
             player.sendMessage(ChatColor.GREEN + "You have created the default kit " + defaultKitName + ".");

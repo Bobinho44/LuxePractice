@@ -1,10 +1,7 @@
 package fr.bobinho.luxepractice.commands.team;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
@@ -21,6 +18,7 @@ public class DisbandTeamCommand extends BaseCommand {
      * @param sender the sender
      */
     @Default
+    @Syntax("/disbandteam")
     @CommandPermission("luxepractice.disbandteam")
     public void onDefault(CommandSender sender) {
         if (sender instanceof Player) {
@@ -32,7 +30,7 @@ public class DisbandTeamCommand extends BaseCommand {
                 return;
             }
 
-            if (!PracticeTeamManager.getPracticePlayerTeam(practicePlayer).get().getLeader().equals(practicePlayer)) {
+            if (!PracticeTeamManager.isItPracticeTeamLeader(practicePlayer)) {
                 player.sendMessage(ChatColor.RED + "You are not the leader of your team!");
                 return;
             }

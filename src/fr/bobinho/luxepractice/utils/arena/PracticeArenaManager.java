@@ -63,7 +63,7 @@ public class PracticeArenaManager {
     }
 
     public static void loadPracticeArenasData() {
-        YamlConfiguration configuration = PracticePlayers.getConfiguration();
+        YamlConfiguration configuration = PracticeArenas.getConfiguration();
             for (String arenaName : configuration.getKeys(false)) {
 
                 Location spawn = PracticeLocationUtil.getAsLocation(configuration.getString(arenaName + ".spawn"));
@@ -72,7 +72,7 @@ public class PracticeArenaManager {
         }
     }
 
-    public static void savePracticePlayerData(@Nonnull UUID uuid) {
+    public static void savePracticeArenasData() {
 
         YamlConfiguration configuration = PracticeArenas.getConfiguration();
         PracticeArenas.clear();
@@ -80,6 +80,8 @@ public class PracticeArenaManager {
         for (PracticeArena arena : getArenas()) {
             configuration.set(arena.getName() + ".spawn", PracticeLocationUtil.getAsString(arena.getSpawn()));
         }
+
+        PracticeArenas.save();
     }
 
 }

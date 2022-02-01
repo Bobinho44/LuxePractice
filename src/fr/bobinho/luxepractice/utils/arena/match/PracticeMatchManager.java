@@ -2,10 +2,15 @@ package fr.bobinho.luxepractice.utils.arena.match;
 
 import fr.bobinho.luxepractice.LuxePracticeCore;
 import fr.bobinho.luxepractice.utils.arena.PracticeArena;
+import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
+import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn;
+import net.minecraft.server.v1_16_R3.PlayerConnection;
 import org.atlanmod.commons.Guards;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -45,7 +50,16 @@ public class PracticeMatchManager {
     }
 
     public static boolean isInMatch(@Nonnull PracticePlayer practicePlayer) {
-        return getMatchs().stream().anyMatch(match -> match.getALlMembers().contains(practicePlayer) && match.isStarted());
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+
+        return getMatchs().stream().anyMatch(match -> match.getALlMembers().contains(practicePlayer));
+    }
+
+    public static boolean practiceTeamMemberIsInMatch(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkArgument(PracticeTeamManager.hasPracticeTeam(practicePlayer), "practicePlayer doesn't have team");
+
+        return PracticeTeamManager.getPracticePlayerTeam(practicePlayer).get().getMembers().stream().anyMatch(member -> isInMatch(member));
     }
 
     public static List<PracticeArena> getUsedPracticeArenas() {
@@ -54,30 +68,27 @@ public class PracticeMatchManager {
 
     public static void sendMessageToAllPlayerInMatch(BaseComponent[] message, PracticeMatch practiceMatch) {
         for (PracticePlayer practicePlayer : practiceMatch.getALlMembers()) {
-            practicePlayer.getSpigotPlayer().get().sendMessage(message);
+            practicePlayer.sendMessage(message);
         }
     }
 
     public static void addSpectator(@Nonnull PracticePlayer practiceViewer, @Nonnull PracticePlayer practiceStreamer) {
         Guards.checkNotNull(practiceStreamer, "practiceStreamer is null");
         Guards.checkNotNull(practiceViewer, "practiceViewer is null");
-        Guards.checkArgument(!isInMatch(practiceViewer), "practiceViewer is already in a match");
         Guards.checkArgument(isInMatch(practiceStreamer), "practiceStreamer is not in a match");
 
         PracticeMatch practiceMatch = getMatch(practiceStreamer).get();
 
-        practiceMatch.addSpectator(practiceViewer);
-        for (PracticePlayer member1 : practiceMatch.getALlMembers()) {
-            for (PracticePlayer member2 : practiceMatch.getALlMembers()) {
-                if (!practiceMatch.isSpectator(member1) && !member1.equals(member2)) {
-                    member1.getSpigotPlayer().get().hidePlayer(LuxePracticeCore.getInstance(), member2.getSpigotPlayer().get());
-                }
-                if (practiceMatch.isSpectator(member1) && practiceMatch.isSpectator(member2) && !member1.equals(member2)) {
-                    member1.getSpigotPlayer().get().hidePlayer(LuxePracticeCore.getInstance(), member2.getSpigotPlayer().get());
-                }
-            }
+        if (!practiceMatch.isDeadFighter(practiceViewer)) {
+            Bukkit.getConsoleSender().sendMessage("SAAAVE");
+            practiceViewer.saveOldInventory();
         }
-        practiceViewer.getSpigotPlayer().get().setAllowFlight(true);
+        PracticeKitManager.giveSpectatorPracticeKit(practiceViewer);
+
+        practiceMatch.addSpectator(practiceViewer);
+        practiceViewer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999999, 1));
+        practiceViewer.setAllowFlight(true);
+        Bukkit.getConsoleSender().sendMessage("SPEECCC");
     }
 
     public static void addOldFighterAsSpectator(@Nonnull PracticePlayer practiceViewer) {
@@ -85,6 +96,8 @@ public class PracticeMatchManager {
         Guards.checkArgument(isInMatch(practiceViewer), "practiceViewer is already in a match");
 
         addSpectator(practiceViewer, practiceViewer);
+
+        practiceViewer.changeName(practiceViewer.getName());
     }
 
     public static void removeSpectator(@Nonnull PracticePlayer practiceViewer) {
@@ -94,7 +107,8 @@ public class PracticeMatchManager {
         PracticeMatch practiceMatch = getMatch(practiceViewer).get();
 
         practiceMatch.removeSpectator(practiceViewer);
-        Bukkit.getOnlinePlayers().forEach(player -> practiceViewer.getSpigotPlayer().get().showPlayer(LuxePracticeCore.getInstance(), player));
-        practiceViewer.getSpigotPlayer().get().setAllowFlight(false);
+        practiceViewer.removeAllPotionEffects();
+        practiceViewer.setAllowFlight(false);
     }
+
 }

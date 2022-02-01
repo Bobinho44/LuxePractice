@@ -1,10 +1,7 @@
 package fr.bobinho.luxepractice.commands.arena;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.arena.PracticeArenaManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -19,6 +16,7 @@ public class DelArenaCommand extends BaseCommand {
      * @param sender the sender
      */
     @Default
+    @Syntax("/delarena <name>")
     @CommandPermission("luxepractice.delarena")
     public void onDefault(CommandSender sender, @Single String arenaName) {
         if (sender instanceof Player) {
@@ -32,6 +30,9 @@ public class DelArenaCommand extends BaseCommand {
 
             //Deletes the arena
             PracticeArenaManager.deletePracticeArena(arenaName);
+
+            //Sends the message
+            player.sendMessage(ChatColor.GREEN + "You have deleted the " + arenaName + " arena.");
         }
     }
 

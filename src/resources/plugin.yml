@@ -71,3 +71,31 @@ commands:
     description: Inventory commands for LuxePractice.
     usage: /practiceinventory <viewer> <streamer>
     permission: luxepractice.practiceinventory
+  createteam:
+    description: CreateTeam commands for LuxePractice.
+    usage: /createteam <name>
+    permission: luxepractice.createteam
+  disbandteam:
+    description: DisbandTeam commands for LuxePractice.
+    usage: /disbandteam
+    permission: luxepractice.disbandteam
+  leaveteam:
+    description: LeaveTeam commands for LuxePractice.
+    usage: /leaveteam
+    permission: luxepractice.leaveteam
+  team:
+    description: Team commands for LuxePractice.
+    usage: /team
+    permission: luxepractice.team
+  teaminvite:
+    description: TeamInvite commands for LuxePractice.
+    usage: /teaminvite <player>
+    permission: luxepractice.teaminvite
+  teamlist:
+    description: TeamList commands for LuxePractice.
+    usage: /teamlist
+    permission: luxepractice.teamlist
+  teamduel:
+    description: TeamDuel commands for LuxePractice.
+    usage: /teamduel <player>
+    permission: luxepractice.teamduel

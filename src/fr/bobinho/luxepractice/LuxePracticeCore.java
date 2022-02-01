@@ -1,19 +1,20 @@
 package fr.bobinho.luxepractice;
 
 import co.aikar.commands.PaperCommandManager;
-import fr.bobinho.luxepractice.commands.PracticeInventoryCommand;
-import fr.bobinho.luxepractice.commands.arena.DelArenaCommand;
-import fr.bobinho.luxepractice.commands.arena.DuelCommand;
-import fr.bobinho.luxepractice.commands.arena.MatchCommand;
-import fr.bobinho.luxepractice.commands.arena.SetArenaCommand;
+import fr.bobinho.luxepractice.commands.arena.*;
 import fr.bobinho.luxepractice.commands.chest.DelChestCommand;
 import fr.bobinho.luxepractice.commands.chest.SetChestCommand;
+import fr.bobinho.luxepractice.commands.inventory.PracticeInventoryCommand;
 import fr.bobinho.luxepractice.commands.kit.*;
 import fr.bobinho.luxepractice.commands.spawn.SetSpawnCommand;
 import fr.bobinho.luxepractice.commands.spawn.SpawnCommand;
-import fr.bobinho.luxepractice.commands.StatsCommand;
 import fr.bobinho.luxepractice.commands.spectator.SpectateCommand;
+import fr.bobinho.luxepractice.commands.stats.StatsCommand;
+import fr.bobinho.luxepractice.commands.team.*;
 import fr.bobinho.luxepractice.listeners.*;
+import fr.bobinho.luxepractice.utils.arena.PracticeArenaManager;
+import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
+import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import fr.bobinho.luxepractice.utils.settings.PracticeArenas;
 import fr.bobinho.luxepractice.utils.settings.PracticePlayers;
 import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
@@ -24,10 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class LuxePracticeCore extends JavaPlugin {
 
     /**
-     * TODO team: invite
-     *            duel
-     *      match: teamduel
-     *      spec: menu spec pour avoir les inventaire/revenir au menu
+     * TODO spec: menu spec pour avoir les inventaire/revenir au menu
      *      tester
      */
     private static LuxePracticeCore instance;
@@ -50,6 +48,9 @@ public class LuxePracticeCore extends JavaPlugin {
         PracticeSettings.Initialize();
         PracticePlayers.Initialize();
         PracticeArenas.Initialize();
+
+        PracticeArenaManager.loadPracticeArenasData();
+        PracticeKitManager.loadDefaultPracticeKits();
     }
 
     /**
@@ -57,7 +58,10 @@ public class LuxePracticeCore extends JavaPlugin {
      */
     public void onDisable() {
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[LuxePractice] Unloading the plugin...");
-        //TODO Save
+
+        PracticeArenaManager.savePracticeArenasData();
+        PracticeKitManager.saveDefaultPracticeKits();
+        Bukkit.getOnlinePlayers().forEach(player -> PracticePlayerManager.savePracticePlayerData(player.getUniqueId()));
     }
 
     /**
@@ -109,6 +113,15 @@ public class LuxePracticeCore extends JavaPlugin {
 
         //Registers spectator's command
         commandManager.registerCommand(new SpectateCommand());
+
+        //Registers team's command
+        commandManager.registerCommand(new CreateTeamCommand());
+        commandManager.registerCommand(new DisbandTeamCommand());
+        commandManager.registerCommand(new LeaveTeamCommand());
+        commandManager.registerCommand(new TeamCommand());
+        commandManager.registerCommand(new TeamInviteCommand());
+        commandManager.registerCommand(new TeamListCommand());
+        commandManager.registerCommand(new TeamDuelCommand());
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded commands");
     }

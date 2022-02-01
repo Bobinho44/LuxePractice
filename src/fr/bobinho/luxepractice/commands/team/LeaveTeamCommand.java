@@ -4,7 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Single;
+import co.aikar.commands.annotation.Syntax;
 import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
@@ -18,29 +18,37 @@ public class LeaveTeamCommand extends BaseCommand {
     /**
      * Command leaveteam
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
-    @CommandPermission("luxepractice.leaveteam")
-    public void onDefault(CommandSender sender) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
+    @Syntax("/leaveteam")
+    @CommandPermission("luxepractice.teaminvite")
+    public void onLeaveTeamCommand(CommandSender commandSender) {
+        if (commandSender instanceof Player) {
+            Player sender = (Player) commandSender;
+            PracticePlayer practiceSender = PracticePlayerManager.getPracticePlayer(sender.getUniqueId());
 
-            if (!PracticeTeamManager.hasPracticeTeam(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You doesn't have a team!");
+            //Checks if the practice sender has a practice team
+            if (!PracticeTeamManager.hasPracticeTeam(practiceSender)) {
+                sender.sendMessage(ChatColor.RED + "You doesn't have a team!");
                 return;
             }
 
-            if (PracticeTeamManager.getPracticePlayerTeam(practicePlayer).get().getLeader().equals(practicePlayer)) {
-                PracticeTeamManager.deletePracticeTeam(practicePlayer);
-                player.sendMessage(ChatColor.GREEN + "You have deleted your team.");
+            //Checks if the practice sender is the leader of his practice team
+            if (PracticeTeamManager.isItPracticeTeamLeader(practiceSender)) {
+
+                //Disbands the practice team
+                PracticeTeamManager.sendMessageToPracticeTeamMembers(practiceSender, ChatColor.RED + "Your team has been disbanded!");
+                PracticeTeamManager.deletePracticeTeam(practiceSender);
                 return;
             }
 
-            PracticeTeamManager.leavePracticeTeam(practicePlayer);
-            player.sendMessage(ChatColor.GREEN + "You have leaved your team.");
+            //Leaves the practice team
+            PracticeTeamManager.leavePracticeTeam(practiceSender);
 
+            //Messages
+            sender.sendMessage(ChatColor.GREEN + "You have left your team.");
+            PracticeTeamManager.sendMessageToPracticeTeamMembers(practiceSender, ChatColor.RED + sender.getName() + " left the team!");
         }
     }
 

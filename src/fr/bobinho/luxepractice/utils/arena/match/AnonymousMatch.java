@@ -104,39 +104,53 @@ public class AnonymousMatch extends PracticeMatch {
 
     @Override
     public List<PracticePlayer> getALlMembers() {
+        if (isEnded()) return getSpectators();
         return Stream.concat(List.of(getPlayer1(), getPlayer2()).stream(), getSpectators().stream()).collect(Collectors.toList());
     }
 
     @Override
     public boolean isFinished() {
+        Bukkit.getConsoleSender().sendMessage("2222222222222222222222 " + getDeathPracticePlayers().size());
         return getDeathPracticePlayers().size() > 0;
     }
 
     @Override
     public void start() {
-        super.start();
         for (PracticePlayer practicePlayer : getALlMembers()) {
+            practicePlayer.saveOldInventory();
+
             practicePlayer.teleportAroundLocation(getArena().getSpawn());
             practicePlayer.removeAllPotionEffects();
             PracticeKitManager.givePracticeKit(practicePlayer, getKit());
-            practicePlayer.getSpigotPlayer().get().sendMessage(getStartMessage(practicePlayer));
+            practicePlayer.sendMessage(getStartMessage(practicePlayer));
         }
     }
 
     @Override
     public void end() {
-        setWinner(getDeathPracticePlayers().equals(getPlayer1()) ? getPlayer2() : getPlayer1());
+        setWinner(getDeathPracticePlayers().contains(getPlayer1()) ? getPlayer2() : getPlayer1());
         for (PracticePlayer practicePlayer : getALlMembers()) {
-            if (isDeadFighter(practicePlayer)) {
+            if (!isDeadFighter(practicePlayer)) {
                 PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
             }
             practicePlayer.removeAllPotionEffects();
-            practicePlayer.getSpigotPlayer().get().sendMessage(getEndMessage());
+            practicePlayer.sendMessage(getEndMessage());
         }
 
         for (Player player : Bukkit.getOnlinePlayers().stream().filter(player -> getALlMembers().contains(PracticePlayerManager.getPracticePlayer(player.getUniqueId()))).collect(Collectors.toList())) {
             player.sendMessage(getBroadcastMessage());
         }
+        setEnd();
+    }
+
+    @Override
+    public String getMatchInfo() {
+        return ChatColor.GOLD + "Match: " + ChatColor.GREEN + (getWinner() != null ? "Winner : " + getWinner().getName() : "Not finished");
+    }
+
+    @Override
+    public List<PracticePlayer> getFighters() {
+        return List.of(getPlayer1(), getPlayer2());
     }
 
 }

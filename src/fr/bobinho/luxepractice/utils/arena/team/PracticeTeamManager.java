@@ -12,14 +12,14 @@ public class PracticeTeamManager {
 
     private static List<PracticeTeam> teams = new ArrayList<PracticeTeam>();
 
-    private static List<PracticeTeam> getPracticeTeams() {
+    public static List<PracticeTeam> getPracticeTeams() {
         return teams;
     }
 
     public static boolean hasPracticeTeam(@Nonnull PracticePlayer practicePlayer) {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
 
-        return getPracticeTeams().stream().anyMatch(team -> team.getMembers().contains(practicePlayer));
+        return getPracticePlayerTeam(practicePlayer).isPresent();
     }
 
     public static Optional<PracticeTeam> getPracticePlayerTeam(@Nonnull PracticePlayer practicePlayer) {
@@ -49,4 +49,18 @@ public class PracticeTeamManager {
        getPracticePlayerTeam(practicePlayer).get().removeMember(practicePlayer);
     }
 
+    public static boolean isItPracticeTeamLeader(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkArgument(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+
+        return getPracticePlayerTeam(practicePlayer).get().getLeader().equals(practicePlayer);
+    }
+
+    public static void sendMessageToPracticeTeamMembers(@Nonnull PracticePlayer practicePlayer, @Nonnull String message) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Guards.checkNotNull(message, "message is null");
+        Guards.checkArgument(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+
+        getPracticePlayerTeam(practicePlayer).get().getMembers().forEach(practiceMember -> practiceMember.sendMessage(message));
+    }
 }

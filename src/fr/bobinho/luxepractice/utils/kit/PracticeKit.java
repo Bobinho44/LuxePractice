@@ -24,7 +24,7 @@ public class PracticeKit {
     }
 
     public ItemStack getItem(int i) {
-        Guards.checkArgument(i >= 0 && i < 40, "the slot " + i + " doesn't exist");
+        Guards.checkArgument(i >= 0 && i < 41, "the slot " + i + " doesn't exist");
 
         return getItems()[i];
     }

@@ -1,11 +1,17 @@
 package fr.bobinho.luxepractice.utils.kit;
 
+import fr.bobinho.luxepractice.utils.arena.match.PracticeMatch;
+import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
 import org.atlanmod.commons.Guards;
-import org.atlanmod.commons.Preconditions;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -65,11 +71,15 @@ public class PracticeKitManager {
 
         //Loads default kits
         List<PracticeKit> kits = new ArrayList<PracticeKit>();
-        for (String defaultKitName : Objects.requireNonNull(configuration.getConfigurationSection("defaultKits")).getKeys(false)) {
+        if (configuration.getConfigurationSection("defaultKits") == null) {
+            return;
+        }
+
+        for (String defaultKitName : configuration.getConfigurationSection("defaultKits").getKeys(false)) {
 
             //Loads default kit's items
-            ItemStack[] items = new ItemStack[40];
-            for (int i = 0; i < 40; i++) {
+            ItemStack[] items = new ItemStack[41];
+            for (int i = 0; i < 41; i++) {
                 items[i] = configuration.getItemStack("defaultKits." + defaultKitName + "." + i, null);
             }
 
@@ -88,13 +98,15 @@ public class PracticeKitManager {
         for (DefaultPracticeKit defaultKit : getDefaultPracticetKits()) {
 
             //Saves default kit's items
-            for (int i = 0; i < 40; i++) {
+            for (int i = 0; i < 41; i++) {
                 configuration.set("defaultKits." + defaultKit.getName() + "." + i, defaultKit.getItem(i));
             }
 
             //Saves default kit main's statue
             configuration.set("defaultKits." + defaultKit.getName() + ".isMainDefaultKit", defaultKit.isMainDefaultKit());
         }
+
+        PracticeSettings.save();
     }
 
     public static boolean haveEmptyPracticeKitSlot(@Nonnull PracticePlayer practicePlayer) {
@@ -135,9 +147,9 @@ public class PracticeKitManager {
     public static ItemStack[] getPlayerInventoryAsKit(@Nonnull PracticePlayer practicePlayer) {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
 
-        ItemStack[] items = new ItemStack[40];
-        for (int i = 0; i < 40; i++) {
-            items[i] = practicePlayer.getSpigotPlayer().get().getInventory().getItem(i).clone();
+        ItemStack[] items = new ItemStack[41];
+        for (int i = 0; i < 41; i++) {
+            items[i] = practicePlayer.getItem(i);
         }
         return items;
     }
@@ -147,8 +159,8 @@ public class PracticeKitManager {
         Guards.checkNotNull(kitName, "kitName is null");
         Guards.checkArgument(isAlreadyAnUsedPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
 
-        for (int i = 0; i < 40; i++) {
-            practicePlayer.getSpigotPlayer().get().getInventory().setItem(i, practicePlayer.getKit(kitName).get().getItem(i));
+        for (int i = 0; i < 41; i++) {
+            practicePlayer.setItem(i, practicePlayer.getKit(kitName).get().getItem(i));
         }
     }
 
@@ -156,8 +168,8 @@ public class PracticeKitManager {
         Guards.checkNotNull(practicePlayer, "practicePlayer is null");
         Guards.checkNotNull(practiceKit, "practiceKit is null");
 
-        for (int i = 0; i < 40; i++) {
-            practicePlayer.getSpigotPlayer().get().getInventory().setItem(i, practiceKit.getItem(i));
+        for (int i = 0; i < 41; i++) {
+            practicePlayer.setItem(i, practiceKit.getItem(i));
         }
     }
 
@@ -182,5 +194,45 @@ public class PracticeKitManager {
 
         practicePlayer.setAutoKit(null);
     }
+
+    public static void giveSpectatorPracticeKit(@Nonnull PracticePlayer practicePlayer) {
+        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+
+        for (int i = 0; i < 41; i++) {
+            if (i == 0) practicePlayer.setItem(i, getInfo(PracticeMatchManager.getMatch(practicePlayer).get()));
+            else if (i == 4) practicePlayer.setItem(i, getSpawnItem());
+            else practicePlayer.setItem(i, null);
+        }
+        for (int j = 9; j < 36 && j < 9 + PracticeMatchManager.getMatch(practicePlayer).get().getFighters().size(); j++) {
+            practicePlayer.setItem(j, getFighter(PracticeMatchManager.getMatch(practicePlayer).get().getFighters().get(j - 9)));
+        }
+    }
+
+    private static ItemStack getInfo(PracticeMatch match) {
+        ItemStack item = new ItemStack(Material.BOOK);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(match.getMatchInfo());
+        item.setItemMeta(meta);
+        Bukkit.getConsoleSender().sendMessage("ZZZZZZZZZZZZZZZZZZZZZZZ");
+        return item;
+    }
+
+    private static ItemStack getFighter(PracticePlayer practicePlayer) {
+        ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta sm = (SkullMeta) skull.getItemMeta();
+        sm.setDisplayName(ChatColor.GREEN + practicePlayer.getName());
+        sm.setOwningPlayer(practicePlayer.getSpigotPlayer().get());
+        skull.setItemMeta(sm);
+        return  skull;
+    }
+
+    private static ItemStack getSpawnItem() {
+        ItemStack item = new ItemStack(Material.OAK_DOOR);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatColor.GOLD + "Back to the spawn");
+        item.setItemMeta(meta);
+        return item;
+    }
+
 
 }

@@ -1,4 +1,4 @@
-package fr.bobinho.luxepractice.commands;
+package fr.bobinho.luxepractice.commands.inventory;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
@@ -26,14 +26,15 @@ public class PracticeInventoryCommand extends BaseCommand {
      */
     @Default
     @CommandPermission("luxepractice.practiceinventory")
-    public void onDefault(CommandSender sender, @Single OnlinePlayer viewer, @Single String uuid) {
-        if (sender instanceof CraftPlayer) {
-            Player streamer = Bukkit.getPlayer(UUID.fromString(uuid));
+    public void onDefault(CommandSender sender, @Single OnlinePlayer streamer) {
+        if (sender instanceof Player) {
 
+            Bukkit.getConsoleSender().sendMessage("TESTINV " + streamer.getPlayer().getName());
             //Checks if the uuid is valid
             if (streamer != null) {
-                Bukkit.createInventory(new PracticeInventoryHolder(), InventoryType.PLAYER, Component.text(streamer.getName() + "'s inventory"));
-                viewer.getPlayer().openInventory(streamer.getInventory());
+                Bukkit.getConsoleSender().sendMessage("TESTINV2");
+                Bukkit.createInventory(new PracticeInventoryHolder(), InventoryType.PLAYER, Component.text(streamer.getPlayer().getName() + "'s inventory"));
+                ((Player) sender).openInventory(streamer.getPlayer().getInventory());
             }
         }
     }
