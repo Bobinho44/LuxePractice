@@ -53,8 +53,12 @@ commands:
     permission: luxepractice.savekit
   setkit:
     description: SetKit commands for LuxePractice.
-    usage: /setkit <name>
-    permission: luxepractice.delchest
+    usage: /setkit <name> <boolean>
+    permission: luxepractice.setkit
+  unsetkit:
+    description: UnsetKit commands for LuxePractice.
+    usage: /unsetkit <name>
+    permission: luxepractice.unsetkit
   setspawn:
     description: SetSpawn commands for LuxePractice.
     usage: /setspawn

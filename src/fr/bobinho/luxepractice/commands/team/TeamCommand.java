@@ -19,34 +19,33 @@ public class TeamCommand extends BaseCommand {
     /**
      * Command team
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/team")
     @CommandPermission("luxepractice.team")
-    public void onDefault(CommandSender sender) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
+    public void onTeamCommand(CommandSender commandSender) {
+        if (commandSender instanceof Player) {
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender -> {
 
-            //Checks if the practice player has practice team
-            if (!PracticeTeamManager.hasPracticeTeam(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You doesn't have a team!");
-                return;
-            }
+                //Checks if the practice player has practice team
+                if (!PracticeTeamManager.hasPracticeTeam(practiceSender)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You doesn't have a team!");
+                    return;
+                }
 
-            //Gets the practice team
-            PracticeTeam practiceTeam = PracticeTeamManager.getPracticePlayerTeam(practicePlayer).get();
+                //Gets the practice team
+                PracticeTeam practiceTeam = PracticeTeamManager.getPracticeTeam(practiceSender).get();
 
-            //Gets practice team's members information
-            StringBuilder practiceTeamMembers = new StringBuilder(ChatColor.GOLD + practiceTeam.getLeader().getName() + " team's members: ");
-            for (PracticePlayer practiceMember : practiceTeam.getMembers()) {
-                practiceTeamMembers.append(ChatColor.GOLD + "- " + ChatColor.YELLOW + practiceMember.getName());
-            }
+                //Gets practice team's members information
+                StringBuilder practiceTeamMembers = new StringBuilder(ChatColor.GOLD + practiceTeam.getLeader().getName() + " team's members: ");
+                for (PracticePlayer practiceMember : practiceTeam.getMembers()) {
+                    practiceTeamMembers.append(ChatColor.GOLD + "- " + ChatColor.YELLOW + practiceMember.getName());
+                }
 
-            //Sends message
-            player.sendMessage(practiceTeamMembers.toString());
-
+                //Sends message
+                practiceSender.sendMessage(practiceTeamMembers.toString());
+            });
         }
     }
 

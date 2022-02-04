@@ -1,6 +1,7 @@
 package fr.bobinho.luxepractice.utils.settings;
 
 import fr.bobinho.luxepractice.LuxePracticeCore;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -13,17 +14,37 @@ import java.nio.file.Files;
 
 public class PracticeSettings {
 
-    private static YamlConfiguration configuration;
+    /**
+     * Fields
+     */
+    private final String fileName;
+    private YamlConfiguration configuration;
+
+    public PracticeSettings(@Nonnull String fileName) {
+        Validate.notNull(fileName, "fileName is null");
+
+        this.fileName = fileName;
+        Initialize();
+    }
+
+    /**
+     * Gets the file name
+     *
+     * @return the file name
+     */
+    public String getFileName() {
+        return fileName;
+    }
 
     /**
      * Initializes settings file
      */
-    public static void Initialize() {
-        File file = new File(LuxePracticeCore.getInstance().getDataFolder() + "/settings.yml");
+    public void Initialize() {
+        File file = new File(LuxePracticeCore.getInstance().getDataFolder() + "/" + getFileName() + ".yml");
 
         if (!file.exists()) {
             file.getParentFile().mkdirs();
-            try (InputStream input = PracticeSettings.class.getResourceAsStream("/settings.yml")) {
+            try (InputStream input = PracticeSettings.class.getResourceAsStream("/" + getFileName() + ".yml")) {
                 if (input != null)
                     Files.copy(input, file.toPath());
                 else
@@ -36,27 +57,36 @@ public class PracticeSettings {
 
         configuration = YamlConfiguration.loadConfiguration(file);
 
-        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded settings");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "Successfully loaded " + getFileName() + " data");
     }
 
     /**
      * Gets configuration
      *
-     * @return Configuration
+     * @return the configuration
      */
     @Nonnull
-    public static YamlConfiguration getConfiguration() {
+    public YamlConfiguration getConfiguration() {
         return configuration;
+    }
+
+    /**
+     * Clears configuration
+     */
+    public void clear() {
+        for (String key : getConfiguration().getKeys(false)) {
+            getConfiguration().set(key, null);
+        }
     }
 
     /**
      * Saves configuration
      */
-    public static void save() {
+    public void save() {
         try {
-            getConfiguration().save(LuxePracticeCore.getInstance().getDataFolder() + "/settings.yml");
+            getConfiguration().save(LuxePracticeCore.getInstance().getDataFolder() + "/" + getFileName() + ".yml");
         } catch (IOException e) {
-            Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Could not save the settings.yml file");
+            Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.RED + "Could not save the " + getFileName() + ".yml file");
         }
     }
 

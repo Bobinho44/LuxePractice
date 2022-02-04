@@ -1,130 +1,193 @@
 package fr.bobinho.luxepractice.utils.player;
 
+import fr.bobinho.luxepractice.LuxePracticeCore;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
-import fr.bobinho.luxepractice.utils.settings.PracticePlayers;
-import org.atlanmod.commons.Guards;
-import org.atlanmod.commons.Preconditions;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class PracticePlayerManager {
 
-    private static final List<PracticePlayer> practicePlayers = new ArrayList<PracticePlayer>();
+    /**
+     * The practice players list
+     */
+    private static final List<PracticePlayer> practicePlayers = new ArrayList<>();
 
+    /**
+     * Gets all practice players
+     *
+     * @return all practice players
+     */
+    @Nonnull
     private static List<PracticePlayer> getPracticePlayers() {
         return practicePlayers;
     }
 
-    private static boolean isAlreadyRegistered(@Nonnull UUID uuid) {
-        Preconditions.requireThat(uuid).isNotNull();
+    /**
+     * Gets a practice player
+     *
+     * @param uuid the practice player uuid
+     * @return the practice player
+     */
+    @Nonnull
+    public static Optional<PracticePlayer> getPracticePlayer(@Nonnull UUID uuid) {
+        Validate.notNull(uuid, "uuid is null");
 
-        return getPracticePlayers().stream().anyMatch(practicePlayer -> practicePlayer.getUuid().equals(uuid));
+        return getPracticePlayers().stream().filter(practicePlayer -> practicePlayer.getUuid().equals(uuid)).findFirst();
     }
 
+    /**
+     * Checks if the uuid corresponds to a practice player
+     *
+     * @param uuid the practice player uuid
+     * @return if it is a practice player
+     */
+    public static boolean isItPracticePlayer(@Nonnull UUID uuid) {
+        Validate.notNull(uuid, "uuid is null");
 
-    public static PracticePlayer getPracticePlayer(@Nonnull UUID uuid) {
-        Guards.checkNotNull(uuid, "uuid is null");
-        Guards.checkArgument(isAlreadyRegistered(uuid), "player is not registered");
-
-        return getPracticePlayers().stream().filter(practicePlayer -> practicePlayer.getUuid().equals(uuid)).findFirst().get();
+        return getPracticePlayer(uuid).isPresent();
     }
 
-    private static void addPlayer(@Nonnull PracticePlayer practicePlayer) {
-        Preconditions.requireThat(practicePlayer).isNotNull();
-        Preconditions.requireThat(isAlreadyRegistered(practicePlayer.getUuid())).isFalse();
+    /**
+     * Registers a practice player
+     *
+     * @param uuid   the uuid
+     * @param name   the name
+     * @param kills  the kills number
+     * @param deaths the deaths number
+     * @return the practice player
+     */
+    @Nonnull
+    public static PracticePlayer registerPracticePlayer(@Nonnull UUID uuid, @Nonnull String name, int kills, int deaths) {
+        Validate.notNull(uuid, "uuid is null");
+        Validate.notNull(name, "name is null");
+        Validate.isTrue(!isItPracticePlayer(uuid), "player is already registered");
 
-        Bukkit.getConsoleSender().sendMessage("remove");
+        PracticePlayer practicePlayer = new PracticePlayer(uuid, name, kills, deaths);
         getPracticePlayers().add(practicePlayer);
+        return practicePlayer;
     }
 
-    public static void removePlayer(@Nonnull PracticePlayer practicePlayer) {
-        Preconditions.requireThat(practicePlayer).isNotNull();
-        Preconditions.requireThat(isAlreadyRegistered(practicePlayer.getUuid())).isTrue();
+    /**
+     * Registers a practice player
+     *
+     * @param player the player
+     */
+    public static void registerPracticePlayer(@Nonnull Player player) {
+        Validate.notNull(player, "player is null");
+        Validate.isTrue(!isItPracticePlayer(player.getUniqueId()), "player is already registered");
+
+        getPracticePlayers().add(new PracticePlayer(player));
+    }
+
+    /**
+     * Unregisters a practice player
+     *
+     * @param practicePlayer the practice player
+     */
+    public static void unregisterPracticePlayer(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(isItPracticePlayer(practicePlayer.getUuid()), "practicePlayer is not registered");
 
         getPracticePlayers().remove(practicePlayer);
     }
 
-    public static void loadPracticePlayerData(@Nonnull UUID uuid) {
-        Guards.checkNotNull(uuid, "uuid is null");
-        Guards.checkArgument(!isAlreadyRegistered(uuid), "the player is already registered");
+    /**
+     * Loads a practice player data
+     *
+     * @param player the player
+     */
+    public static void loadPracticePlayerData(@Nonnull Player player) {
+        Validate.notNull(player, "player is null");
+        Validate.isTrue(!isItPracticePlayer(player.getUniqueId()), "player is already registered");
 
-        YamlConfiguration configuration = PracticePlayers.getConfiguration();
+        YamlConfiguration configuration = LuxePracticeCore.getPlayersSettings().getConfiguration();
 
-        //Loads player's name
-        String name = configuration.getString(uuid + ".name");
+        //Loads a new practice player
+        if (configuration.getConfigurationSection(player.getUniqueId().toString()) == null) {
+            registerPracticePlayer(player);
+            return;
+        }
 
-        //Loads player's stats
+        //Loads the practice player informations
+        UUID uuid = player.getUniqueId();
+        String name = configuration.getString(uuid + ".name", player.getName());
+
+        //Loads the practice player stats
         int kills = configuration.getInt(uuid + ".stats.kills");
         int deaths = configuration.getInt(uuid + ".stats.deaths");
 
-        //Loads player's kits
-        List<PracticeKit> kits = new ArrayList<PracticeKit>();
+        //Registers the practice player
+        PracticePlayer practicePlayer = registerPracticePlayer(uuid, name, kills, deaths);
+
+        //Loads the practice player kits
         if (configuration.getConfigurationSection(uuid + ".kits") != null) {
-            for (String kitName : configuration.getConfigurationSection(uuid + ".kits").getKeys(false)) {
-                ItemStack[] items = new ItemStack[41];
+            for (String kitName : Objects.requireNonNull(configuration.getConfigurationSection(uuid + ".kits")).getKeys(false)) {
+                ItemStack[] kitItems = new ItemStack[41];
                 for (int i = 0; i < 41; i++) {
-                    items[i] = configuration.getItemStack(uuid + ".kits." + kitName + "." + i);
+                    kitItems[i] = configuration.getItemStack(uuid + ".kits." + kitName + "." + i);
                 }
-                kits.add(new PracticeKit(kitName, items));
+                PracticeKitManager.createPracticeKit(practicePlayer, kitName, kitItems);
             }
         }
 
-        //Loads player's auto kit
-        PracticeKit autokit = kits.stream()
-                .filter(kit -> kit.getName().equalsIgnoreCase(configuration.getString(uuid + ".autokit")))
-                .findFirst().orElse(null);
+        //Loads the practice player auto kit
+        practicePlayer.setAutoKit(practicePlayer.getKit(configuration.getString(uuid + ".autokit", "")).orElse(null));
 
-        //Creates practice player
-        addPlayer(name == null ? new PracticePlayer(Bukkit.getPlayer(uuid)) : new PracticePlayer(uuid, name, kills, deaths, kits, autokit));
-
-        //Loads old inventory
+        //Loads the practice player old inventory
         ItemStack[] items = new ItemStack[41];
         for (int i = 0; i < 41; i++) {
             items[i] = configuration.getItemStack(uuid + ".oldinventory." + i);
         }
-        PracticePlayerManager.getPracticePlayer(uuid).saveOldInventory(items);
+
+        practicePlayer.saveOldInventory(items);
     }
 
+    /**
+     * Saves the practice player data
+     *
+     * @param uuid the practice player uuid
+     */
     public static void savePracticePlayerData(@Nonnull UUID uuid) {
-        Guards.checkNotNull(uuid, "uuid is null");
-        Guards.checkArgument(isAlreadyRegistered(uuid), "the player is not registered");
+        Validate.notNull(uuid, "uuid is null");
+        Validate.isTrue(isItPracticePlayer(uuid), "player is not registered");
 
-        YamlConfiguration configuration = PracticePlayers.getConfiguration();
+        YamlConfiguration configuration = LuxePracticeCore.getPlayersSettings().getConfiguration();
         configuration.set(uuid.toString(), null);
-        PracticePlayer practicePlayer = getPracticePlayer(uuid);
 
-        //Saves player's name
-        configuration.set(uuid + ".name", practicePlayer.getName());
+        getPracticePlayer(uuid).ifPresent(practicePlayer -> {
 
-        //Saves player's stats
-        configuration.set(uuid + ".stats.kills", practicePlayer.getKills());
-        configuration.set(uuid + ".stats.deaths", practicePlayer.getDeaths());
+            //Saves practice player name
+            configuration.set(uuid + ".name", practicePlayer.getName());
 
-        //Saves player's kits
-        for (PracticeKit kits : practicePlayer.getKits()) {
-            for (int i = 0; i < 41; i++) {
-                configuration.set(uuid + ".kits." + kits.getName() + "." + i, kits.getItem(i));
+            //Saves player stats
+            configuration.set(uuid + ".stats.kills", practicePlayer.getKills());
+            configuration.set(uuid + ".stats.deaths", practicePlayer.getDeaths());
+
+            //Saves practice player kits
+            for (PracticeKit practiceKit : practicePlayer.getKits()) {
+                for (int i = 0; i < 41; i++) {
+                    configuration.set(uuid + ".kits." + practiceKit.getName() + "." + i, practiceKit.getItem(i));
+                }
             }
-        }
 
-        //Saves player's autokit
-        if (PracticeKitManager.haveAutoPracticeKit(practicePlayer)) {
-            configuration.set(uuid + ".autokit", practicePlayer.getAutoKit().get().getName());
-        }
+            //Saves practice player autokit
+            if (PracticeKitManager.haveAutoPracticeKit(practicePlayer)) {
+                configuration.set(uuid + ".autokit", practicePlayer.getAutoKit().get().getName());
+            }
 
-        //Saves old inventory
-        for (int i = 0; i < 41; i++) {
-            configuration.set(uuid + ".oldinventory." + i, practicePlayer.getOldInventory()[i]);
-        }
+            //Saves practice player old inventory
+            for (int i = 0; i < 41; i++) {
+                configuration.set(uuid + ".oldinventory." + i, practicePlayer.getOldInventory()[i]);
+            }
 
-        PracticePlayers.save();
+            LuxePracticeCore.getPlayersSettings().save();
+        });
     }
 
 }

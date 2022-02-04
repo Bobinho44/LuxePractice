@@ -15,23 +15,57 @@ import fr.bobinho.luxepractice.listeners.*;
 import fr.bobinho.luxepractice.utils.arena.PracticeArenaManager;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
-import fr.bobinho.luxepractice.utils.settings.PracticeArenas;
-import fr.bobinho.luxepractice.utils.settings.PracticePlayers;
 import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nonnull;
+
 public class LuxePracticeCore extends JavaPlugin {
 
     /**
-     * TODO spec: menu spec pour avoir les inventaire/revenir au menu
-     *      tester
+     * Fields
      */
     private static LuxePracticeCore instance;
+    private static PracticeSettings arenasSettings;
+    private static PracticeSettings playersSettings;
+    private static PracticeSettings mainSettings;
 
+    /**
+     * Gets the luxe practice core instance
+     * @return the luxe practice core instance
+     */
+    @Nonnull
     public static LuxePracticeCore getInstance() {
         return instance;
+    }
+
+    /**
+     * Gets the arenas settings
+     * @return the arenas settings
+     */
+    @Nonnull
+    public static PracticeSettings getArenasSettings() {
+        return arenasSettings;
+    }
+
+    /**
+     * Gets the players settings
+     * @return the players settings
+     */
+    @Nonnull
+    public static PracticeSettings getPlayersSettings() {
+        return playersSettings;
+    }
+
+    /**
+     * Gets the main settings
+     * @return the main settings
+     */
+    @Nonnull
+    public static PracticeSettings getMainSettings() {
+        return mainSettings;
     }
 
     /**
@@ -45,12 +79,12 @@ public class LuxePracticeCore extends JavaPlugin {
         registerCommands();
         registerListeners();
 
-        PracticeSettings.Initialize();
-        PracticePlayers.Initialize();
-        PracticeArenas.Initialize();
+        arenasSettings = new PracticeSettings("arenas");
+        playersSettings = new PracticeSettings("players");
+        mainSettings = new PracticeSettings("settings");
 
         PracticeArenaManager.loadPracticeArenasData();
-        PracticeKitManager.loadDefaultPracticeKits();
+        PracticeKitManager.loadBasicPracticeKits();
     }
 
     /**
@@ -60,7 +94,7 @@ public class LuxePracticeCore extends JavaPlugin {
         Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + "[LuxePractice] Unloading the plugin...");
 
         PracticeArenaManager.savePracticeArenasData();
-        PracticeKitManager.saveDefaultPracticeKits();
+        PracticeKitManager.saveBasicPracticeKits();
         Bukkit.getOnlinePlayers().forEach(player -> PracticePlayerManager.savePracticePlayerData(player.getUniqueId()));
     }
 
@@ -101,6 +135,7 @@ public class LuxePracticeCore extends JavaPlugin {
         commandManager.registerCommand(new LoadKitCommand());
         commandManager.registerCommand(new AutoKitCommand());
         commandManager.registerCommand(new SetKitCommand());
+        commandManager.registerCommand(new UnsetKitCommand());
 
         //Register see inventory's command
         commandManager.registerCommand(new PracticeInventoryCommand());

@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 
 import java.util.UUID;
 
@@ -22,22 +23,21 @@ public class PracticeInventoryCommand extends BaseCommand {
     /**
      * Command practiceinventory
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @CommandPermission("luxepractice.practiceinventory")
-    public void onDefault(CommandSender sender, @Single OnlinePlayer streamer) {
-        if (sender instanceof Player) {
+    public void onPracticeInventoryCommand(CommandSender commandSender, @Single OnlinePlayer streamer) {
+        if (commandSender instanceof Player) {
+            Player player = (Player) commandSender;
 
-            Bukkit.getConsoleSender().sendMessage("TESTINV " + streamer.getPlayer().getName());
             //Checks if the uuid is valid
             if (streamer != null) {
-                Bukkit.getConsoleSender().sendMessage("TESTINV2");
-                Bukkit.createInventory(new PracticeInventoryHolder(), InventoryType.PLAYER, Component.text(streamer.getPlayer().getName() + "'s inventory"));
-                ((Player) sender).openInventory(streamer.getPlayer().getInventory());
+                Inventory inventory = Bukkit.createInventory(new PracticeInventoryHolder(), InventoryType.PLAYER, Component.text(streamer.getPlayer().getName() + "'s inventory"));
+                inventory.setContents(streamer.getPlayer().getInventory().getContents());
+                player.openInventory(inventory);
             }
         }
     }
 
 }
-

@@ -18,14 +18,14 @@ public class SetChestCommand extends BaseCommand {
     /**
      * Command setchest
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/setchest")
     @CommandPermission("luxepractice.setchest")
-    public void onDefault(CommandSender sender) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+    public void onSetChestCommand(CommandSender commandSender) {
+        if (commandSender instanceof Player) {
+            Player player = (Player) commandSender;
             Block targetedBlock = player.getTargetBlock(5);
 
             //Checks if player target a chest
@@ -43,7 +43,6 @@ public class SetChestCommand extends BaseCommand {
             //Creates the practice chest
             PracticeChestManager.createPracticeChest(targetedBlock.getLocation());
             player.sendMessage(ChatColor.GREEN + "This chest is now infinite!");
-
         }
     }
 

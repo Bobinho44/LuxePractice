@@ -18,14 +18,14 @@ public class DelChestCommand extends BaseCommand {
     /**
      * Command delchest
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/delchest")
     @CommandPermission("luxepractice.delchest")
-    public void onDefault(CommandSender sender) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+    public void onDelChestCommand(CommandSender commandSender) {
+        if (commandSender instanceof Player) {
+            Player player = (Player) commandSender;
             Block targetedBlock = player.getTargetBlock(5);
 
             //Checks if player target a chest
@@ -47,4 +47,3 @@ public class DelChestCommand extends BaseCommand {
     }
 
 }
-

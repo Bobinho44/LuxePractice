@@ -1,14 +1,21 @@
 package fr.bobinho.luxepractice.utils.arena.inventory;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
 
 public class PracticeInventoryHolder implements InventoryHolder {
 
+    /**
+     * {@inheritDoc}
+     */
+    @Nonnull
     @Override
-    public @NotNull Inventory getInventory() {
-        return null;
+    public Inventory getInventory() {
+        return Bukkit.createInventory(null, InventoryType.PLAYER);
     }
 
 }

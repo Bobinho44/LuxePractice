@@ -1,17 +1,13 @@
 package fr.bobinho.luxepractice.utils.kit;
 
+import fr.bobinho.luxepractice.LuxePracticeCore;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatch;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
+import fr.bobinho.luxepractice.utils.item.PracticeItemUtils;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
-import org.atlanmod.commons.Guards;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -21,218 +17,348 @@ import java.util.Optional;
 
 public class PracticeKitManager {
 
-    private static List<DefaultPracticeKit> defaultKits = new ArrayList<DefaultPracticeKit>();
+    /**
+     * The basic practice kits list
+     */
+    private static final List<BasicPracticeKit> basicPracticeKits = new ArrayList<>();
 
-    private static List<DefaultPracticeKit> getDefaultPracticetKits() {
-        return defaultKits;
+    /**
+     * Gets all basic practice kits
+     *
+     * @return all basic practice kits
+     */
+    @Nonnull
+    private static List<BasicPracticeKit> getBasicPracticeKits() {
+        return basicPracticeKits;
     }
 
-    public static Optional<DefaultPracticeKit> getMainDefaultPracticeKit() {
-        return getDefaultPracticetKits().stream().filter(kit -> kit.isMainDefaultKit()).findFirst();
+    /**
+     * Gets a basic practice kit
+     *
+     * @param basicKitName the basic practice kit name
+     * @return the basic practice kit
+     */
+    @Nonnull
+    public static Optional<BasicPracticeKit> getBasicPracticeKit(@Nonnull String basicKitName) {
+        Validate.notNull(basicKitName, "basicKitName is null");
+
+        return getBasicPracticeKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(basicKitName)).findFirst();
     }
 
-    public static boolean isAlreadyAnUsedDefaultPracticeKit(@Nonnull String defaultKitName) {
-        Guards.checkNotNull(defaultKitName, "defaultKitName is null");
-
-        return getDefaultPracticetKits().stream().anyMatch(kit -> kit.getName().equalsIgnoreCase(defaultKitName));
+    /**
+     * Gets the default basic practice kit
+     *
+     * @return the default basic practice kit
+     */
+    @Nonnull
+    public static Optional<BasicPracticeKit> getDefaultBasicPracticeKit() {
+        return getBasicPracticeKits().stream().filter(BasicPracticeKit::isDefaultKit).findFirst();
     }
 
-    public static Optional<DefaultPracticeKit> getDefaultPracticeKit(@Nonnull String defaultKitName) {
-        Guards.checkNotNull(defaultKitName, "defaultKitName is null");
+    /**
+     * Checks if the basic kit name is associated with a basic practice kit
+     *
+     * @param basicKitName the basic practice kit name
+     * @return if it is a basic practice kit
+     */
+    public static boolean isItBasicPracticeKit(@Nonnull String basicKitName) {
+        Validate.notNull(basicKitName, "basicKitName is null");
 
-        return getDefaultPracticetKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(defaultKitName)).findFirst();
+        return getBasicPracticeKit(basicKitName).isPresent();
     }
 
-    public static void createDefaultPracticeKit(@Nonnull String defaultKitName, ItemStack[] items, boolean isDefaultMainKit) {
-        Guards.checkNotNull(defaultKitName, "defaultKitName is null");
-        Guards.checkNotNull(items, "items is null");
-        Guards.checkArgument(!isAlreadyAnUsedDefaultPracticeKit(defaultKitName), "defaultKItName is already used");
+    /**
+     * Creates a new basic practice kit
+     *
+     * @param basicKitName      the basic practice kit name
+     * @param basicKitItems     the basic practice kit items
+     * @param isDefaultBasicKit if the basic practice kit is the new default basic practice kit
+     */
+    public static void createBasicPracticeKit(@Nonnull String basicKitName, ItemStack[] basicKitItems, boolean isDefaultBasicKit) {
+        Validate.notNull(basicKitName, "basicKitName is null");
+        Validate.notNull(basicKitItems, "basicKitItems is null");
+        Validate.isTrue(!isItBasicPracticeKit(basicKitName), "defaultKItName is already used");
 
-        if (isDefaultMainKit) {
-            getMainDefaultPracticeKit().ifPresent(kit -> kit.setMainDefaultKit(false));
+        //Checks if there is already a default basic practice kit
+        if (isDefaultBasicKit) {
+            getDefaultBasicPracticeKit().ifPresent(kit -> kit.setIsDefaultKit(false));
         }
 
-        if (getMainDefaultPracticeKit().isEmpty()) {
-            isDefaultMainKit = true;
+        //Checks if there is no default basic practice kit
+        if (getDefaultBasicPracticeKit().isEmpty()) {
+            isDefaultBasicKit = true;
         }
 
-        getDefaultPracticetKits().add(new DefaultPracticeKit(defaultKitName, items, isDefaultMainKit));
+        //Creates a new basic practice kit
+        getBasicPracticeKits().add(new BasicPracticeKit(basicKitName, basicKitItems, isDefaultBasicKit));
     }
 
-    public static void deleteDefaultPracticeKit(@Nonnull String defaultKitName) {
-        Guards.checkNotNull(defaultKitName, "defaultKitName is null");
-        Guards.checkArgument(isAlreadyAnUsedDefaultPracticeKit(defaultKitName), "defaultKitName doesn't exist");
+    /**
+     * Deletes a basic practice kit
+     *
+     * @param basicKitName the basic practice kit name
+     */
+    public static void deleteBasicPracticeKit(@Nonnull String basicKitName) {
+        Validate.notNull(basicKitName, "basicKitName is null");
+        Validate.isTrue(isItBasicPracticeKit(basicKitName), "basicKitName is invalid");
 
-        getDefaultPracticetKits().add(getDefaultPracticeKit(defaultKitName).get());
+        getBasicPracticeKits().remove(getBasicPracticeKit(basicKitName).get());
     }
 
-    public static void loadDefaultPracticeKits() {
-        YamlConfiguration configuration = PracticeSettings.getConfiguration();
+    /**
+     * Loads all basic practice kits
+     */
+    public static void loadBasicPracticeKits() {
+        YamlConfiguration configuration = LuxePracticeCore.getMainSettings().getConfiguration();
 
-        //Loads default kits
-        List<PracticeKit> kits = new ArrayList<PracticeKit>();
-        if (configuration.getConfigurationSection("defaultKits") == null) {
+        //Loads basic practice kits
+        if (configuration.getConfigurationSection("basicKits") == null) {
             return;
         }
 
-        for (String defaultKitName : configuration.getConfigurationSection("defaultKits").getKeys(false)) {
+        if (configuration.getConfigurationSection("basicKits") != null) {
+            for (String defaultKitName : Objects.requireNonNull(configuration.getConfigurationSection("basicKits")).getKeys(false)) {
 
-            //Loads default kit's items
-            ItemStack[] items = new ItemStack[41];
-            for (int i = 0; i < 41; i++) {
-                items[i] = configuration.getItemStack("defaultKits." + defaultKitName + "." + i, null);
+                //Loads the basic practice kits items
+                ItemStack[] basicKitItems = new ItemStack[41];
+                for (int i = 0; i < 41; i++) {
+                    basicKitItems[i] = configuration.getItemStack("basicKits." + defaultKitName + "." + i, null);
+                }
+
+                //Loads the basic practice kits default statue
+                boolean isDefaultBasicKit = configuration.getBoolean("basicKits." + defaultKitName + ".isDefaultBasicKit", false);
+
+                //Creates the basic practice kits
+                createBasicPracticeKit(defaultKitName, basicKitItems, isDefaultBasicKit);
             }
-
-            //Loads default kit main's statue
-            boolean isMainDefaultKit = configuration.getBoolean("defaultKits." + defaultKitName + ".isMainDefaultKit", false);
-
-            //Creates the default kit
-            createDefaultPracticeKit(defaultKitName, items, isMainDefaultKit);
         }
     }
 
-    public static void saveDefaultPracticeKits() {
-        YamlConfiguration configuration = PracticeSettings.getConfiguration();
+    public static void saveBasicPracticeKits() {
+        YamlConfiguration configuration = LuxePracticeCore.getMainSettings().getConfiguration();
+        configuration.set("basicKits", null);
 
-        //Saves default kits
-        for (DefaultPracticeKit defaultKit : getDefaultPracticetKits()) {
+        //Saves the basic practice kits
+        for (BasicPracticeKit defaultKit : getBasicPracticeKits()) {
 
-            //Saves default kit's items
+            //Saves the basic practice kits items
             for (int i = 0; i < 41; i++) {
-                configuration.set("defaultKits." + defaultKit.getName() + "." + i, defaultKit.getItem(i));
+                configuration.set("basicKits." + defaultKit.getName() + "." + i, defaultKit.getItem(i));
             }
 
-            //Saves default kit main's statue
-            configuration.set("defaultKits." + defaultKit.getName() + ".isMainDefaultKit", defaultKit.isMainDefaultKit());
+            //Saves the basic practice kits default statue
+            configuration.set("basicKits." + defaultKit.getName() + ".isDefaultBasicKit", defaultKit.isDefaultKit());
         }
 
-        PracticeSettings.save();
+        LuxePracticeCore.getMainSettings().save();
     }
 
+    /**
+     * Checks if the practice player has empty practice kit slot
+     *
+     * @param practicePlayer the practice player
+     * @return is there is empty practice kit slot
+     */
     public static boolean haveEmptyPracticeKitSlot(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
 
         return practicePlayer.getKits().size() < 10;
     }
 
-    public static boolean isAlreadyAnUsedPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkNotNull(kitName, "kitName is null");
+    /**
+     * Checks if the kit name is associated with a practice kit
+     *
+     * @param practicePlayer the practice player
+     * @param kitName        the practice kit name
+     * @return if it is a practice kit
+     */
+    public static boolean isItPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(kitName, "kitName is null");
 
         return practicePlayer.getKits().stream().anyMatch(kit -> kit.getName().equalsIgnoreCase(kitName));
     }
 
+    /**
+     * Creates a new practice kit
+     *
+     * @param practicePlayer the practice player
+     * @param kitName        the practice kit name
+     */
     public static void createPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkNotNull(kitName, "kitName is null");
-        Guards.checkArgument(!isAlreadyAnUsedPracticeKit(practicePlayer, kitName), "kitName is already used");
-        Guards.checkArgument(haveEmptyPracticeKitSlot(practicePlayer), "practicePlayer have already 10 kits");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(kitName, "kitName is null");
+        Validate.isTrue(!isItPracticeKit(practicePlayer, kitName), "kitName is already used");
+        Validate.isTrue(haveEmptyPracticeKitSlot(practicePlayer), "practicePlayer have already 10 kits");
 
-        practicePlayer.addKit(new PracticeKit(kitName, getPlayerInventoryAsKit(practicePlayer)));
+        practicePlayer.addKit(new PracticeKit(kitName, getPracticePlayerInventoryAsKit(practicePlayer)));
     }
 
+    /**
+     * Creates a new practice kit
+     *
+     * @param practicePlayer the practice player
+     * @param kitName        the practice kit name
+     * @param kitItems       the practice kit items
+     */
+    public static void createPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName, @Nonnull ItemStack[] kitItems) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(kitName, "kitName is null");
+        Validate.isTrue(!isItPracticeKit(practicePlayer, kitName), "kitName is already used");
+        Validate.isTrue(haveEmptyPracticeKitSlot(practicePlayer), "practicePlayer have already 10 kits");
+
+        practicePlayer.addKit(new PracticeKit(kitName, kitItems));
+    }
+
+    /**
+     * Deletes the practice kit
+     *
+     * @param practicePlayer the practice player
+     * @param kitName        the practice kit name
+     */
     public static void deletePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkNotNull(kitName, "kitName is null");
-        Guards.checkArgument(isAlreadyAnUsedPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(kitName, "kitName is null");
+        Validate.isTrue(isItPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
 
+        //Gets the practice kit
         PracticeKit kit = practicePlayer.getKit(kitName).get();
-        if (practicePlayer.getAutoKit().equals(kit)) {
-            removeAutoPracticeKit(practicePlayer);
-        }
+
+        //Checks if the practice kit is the auto practice kit of the practice player
+        practicePlayer.getAutoKit().ifPresent(autoKit -> {
+            if (autoKit.equals(kit)) {
+                removeAutoPracticeKit(practicePlayer);
+            }
+        });
+
+        //Deletes the practice kit
         practicePlayer.removeKit(kit);
-
     }
 
-    public static ItemStack[] getPlayerInventoryAsKit(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+    /**
+     * Gets the practice player inventory as kit
+     *
+     * @param practicePlayer the practice player
+     * @return the practice player inventory as kit
+     */
+    @Nonnull
+    public static ItemStack[] getPracticePlayerInventoryAsKit(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
 
-        ItemStack[] items = new ItemStack[41];
+        //Gets the practice player inventory items
+        ItemStack[] kitItems = new ItemStack[41];
         for (int i = 0; i < 41; i++) {
-            items[i] = practicePlayer.getItem(i);
+            kitItems[i] = practicePlayer.getItem(i);
         }
-        return items;
+        return kitItems;
     }
 
+    /**
+     * Gives a practice kit to the practice player
+     *
+     * @param practicePlayer the practice player
+     * @param kitName        the practice kit name
+     */
     public static void givePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkNotNull(kitName, "kitName is null");
-        Guards.checkArgument(isAlreadyAnUsedPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(kitName, "kitName is null");
+        Validate.isTrue(isItPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
 
+        //Gives all practice kit items
         for (int i = 0; i < 41; i++) {
             practicePlayer.setItem(i, practicePlayer.getKit(kitName).get().getItem(i));
         }
     }
 
+    /**
+     * Gives a practice kit to the practice player
+     *
+     * @param practicePlayer the practice player
+     * @param practiceKit    the practice kit
+     */
     public static void givePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull PracticeKit practiceKit) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkNotNull(practiceKit, "practiceKit is null");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(practiceKit, "practiceKit is null");
 
+        //Gives all practice kit items
         for (int i = 0; i < 41; i++) {
             practicePlayer.setItem(i, practiceKit.getItem(i));
         }
     }
 
+    /**
+     * Checks if a practice player has an practice auto kit
+     *
+     * @param practicePlayer the practice player
+     * @return if he has a practice auto kit
+     */
     public static boolean haveAutoPracticeKit(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
 
         return practicePlayer.getAutoKit().isPresent();
     }
 
-    public static void setAutoPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkNotNull(kitName, "kitName is null");
-        Guards.checkArgument(!haveAutoPracticeKit(practicePlayer), "practicePlayer already have an auto kit");
-        Guards.checkArgument(isAlreadyAnUsedPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
+    /**
+     * Sets the auto practice kit
+     *
+     * @param practicePlayer the practice player
+     * @param autoKitName    the practice auto kit name
+     */
+    public static void setAutoPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String autoKitName) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(autoKitName, "autoKitName is null");
+        Validate.isTrue(!haveAutoPracticeKit(practicePlayer), "practicePlayer already have an auto kit");
+        Validate.isTrue(isItPracticeKit(practicePlayer, autoKitName), "this kit doesn't exist");
 
-        practicePlayer.setAutoKit(practicePlayer.getKit(kitName).get());
+        practicePlayer.setAutoKit(practicePlayer.getKit(autoKitName).get());
     }
 
+    /**
+     * Removes the auto practice kit
+     *
+     * @param practicePlayer the practice player
+     */
     public static void removeAutoPracticeKit(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkArgument(haveAutoPracticeKit(practicePlayer), "practicePlayer doesn't have an auto kit");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(haveAutoPracticeKit(practicePlayer), "practicePlayer doesn't have an auto kit");
 
         practicePlayer.setAutoKit(null);
     }
 
+    /**
+     * Gives a spectator practice kit to the practice player
+     *
+     * @param practicePlayer the practice player
+     */
     public static void giveSpectatorPracticeKit(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
 
+        PracticeMatch practiceMatch = PracticeMatchManager.getPracticeMatch(practicePlayer).get();
+
+        //Adds item to the practice player inventory
         for (int i = 0; i < 41; i++) {
-            if (i == 0) practicePlayer.setItem(i, getInfo(PracticeMatchManager.getMatch(practicePlayer).get()));
-            else if (i == 4) practicePlayer.setItem(i, getSpawnItem());
-            else practicePlayer.setItem(i, null);
+
+            //Adds the information item
+            if (i == 0) {
+                practicePlayer.setItem(i, PracticeItemUtils.getPracticeSpectatorInventoryInfoItem(practiceMatch));
+            }
+
+            //Adds back to the spawn item
+            else if (i == 4) {
+                practicePlayer.setItem(i, PracticeItemUtils.getPracticeSpectatorInventorySpawnItem());
+            }
+
+            //Clears inventory
+            else {
+                practicePlayer.setItem(i, null);
+            }
         }
-        for (int j = 9; j < 36 && j < 9 + PracticeMatchManager.getMatch(practicePlayer).get().getFighters().size(); j++) {
-            practicePlayer.setItem(j, getFighter(PracticeMatchManager.getMatch(practicePlayer).get().getFighters().get(j - 9)));
+
+        //Adds fighters information item
+        for (int j = 9; j < 36 && j < 9 + practiceMatch.getFighters().size(); j++) {
+            practicePlayer.setItem(j, PracticeItemUtils.getPracticeSpectatorInventoryFighterItem(practiceMatch.getFighters().get(j - 9)));
         }
     }
-
-    private static ItemStack getInfo(PracticeMatch match) {
-        ItemStack item = new ItemStack(Material.BOOK);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(match.getMatchInfo());
-        item.setItemMeta(meta);
-        Bukkit.getConsoleSender().sendMessage("ZZZZZZZZZZZZZZZZZZZZZZZ");
-        return item;
-    }
-
-    private static ItemStack getFighter(PracticePlayer practicePlayer) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD, 1);
-        SkullMeta sm = (SkullMeta) skull.getItemMeta();
-        sm.setDisplayName(ChatColor.GREEN + practicePlayer.getName());
-        sm.setOwningPlayer(practicePlayer.getSpigotPlayer().get());
-        skull.setItemMeta(sm);
-        return  skull;
-    }
-
-    private static ItemStack getSpawnItem() {
-        ItemStack item = new ItemStack(Material.OAK_DOOR);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "Back to the spawn");
-        item.setItemMeta(meta);
-        return item;
-    }
-
 
 }

@@ -1,32 +1,30 @@
 package fr.bobinho.luxepractice.utils.player;
 
 import com.mojang.authlib.GameProfile;
-import fr.bobinho.luxepractice.utils.arena.request.PracticeRequest;
+import fr.bobinho.luxepractice.LuxePracticeCore;
+import fr.bobinho.luxepractice.utils.format.PracticeNumberFormat;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.location.PracticeLocationUtil;
-import fr.bobinho.luxepractice.utils.settings.PracticeSettings;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_16_R3.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_16_R3.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_16_R3.PacketPlayOutPlayerInfo;
-import org.atlanmod.commons.Guards;
+import net.minecraft.server.v1_16_R3.*;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PracticePlayer {
 
@@ -37,37 +35,37 @@ public class PracticePlayer {
     private final String name;
     private int kills;
     private int deaths;
-    private final List<PracticeKit> kits;
+    private final List<PracticeKit> kits = new ArrayList<>();
     private PracticeKit autoKit;
-    private ItemStack[] oldInventory;
+    private ItemStack[] oldInventory = new ItemStack[41];
 
     /**
      * Creates a new practice player
      *
-     * @param uuid    the player's uuid
-     * @param name    the player's name
-     * @param kills   the player's kills number
-     * @param deaths  the player's deaths number
-     * @param kits    the player's kits
-     * @param autoKit the player's auto kit
+     * @param uuid   the practice player uuid
+     * @param name   the practice player name
+     * @param kills  the practice player kills number
+     * @param deaths the practice player deaths number
      */
-    public PracticePlayer(@Nonnull UUID uuid, @Nonnull String name, int kills, int deaths, @Nonnull List<PracticeKit> kits, @Nonnull PracticeKit autoKit) {
-        Guards.checkNotNull(uuid, "uuid is null");
-        Guards.checkNotNull(name, "name is null");
-        Guards.checkArgument(kills >= 0, "kills is negative");
-        Guards.checkArgument(deaths >= 0, "deaths is negative");
-        Guards.checkNotNull(kits, "kits is null");
+    public PracticePlayer(@Nonnull UUID uuid, @Nonnull String name, int kills, int deaths) {
+        Validate.notNull(uuid, "uuid is null");
+        Validate.notNull(name, "name is null");
+        Validate.isTrue(kills >= 0, "kills is negative");
+        Validate.isTrue(deaths >= 0, "deaths is negative");
 
         this.uuid = uuid;
         this.name = name;
         this.kills = kills;
         this.deaths = deaths;
-        this.kits = kits;
-        this.autoKit = autoKit;
     }
 
+    /**
+     * Creates a new practice player
+     *
+     * @param player the player
+     */
     public PracticePlayer(@Nonnull Player player) {
-        this(player.getUniqueId(), player.getName(), 0, 0, new ArrayList<PracticeKit>(), null);
+        this(player.getUniqueId(), player.getName(), 0, 0);
     }
 
     /**
@@ -85,13 +83,12 @@ public class PracticePlayer {
      *
      * @return the spigot player
      */
-    @Nonnull
-    public Optional<Player> getSpigotPlayer() {
-        return Optional.ofNullable(Bukkit.getPlayer(getUuid()));
+    public Player getSpigotPlayer() {
+        return Bukkit.getPlayer(getUuid());
     }
 
     /**
-     * Gets the player name
+     * Gets the practice player name
      *
      * @return the name
      */
@@ -101,7 +98,7 @@ public class PracticePlayer {
     }
 
     /**
-     * Gets the player deaths number
+     * Gets the practice player deaths number
      *
      * @return the deaths number
      */
@@ -110,14 +107,14 @@ public class PracticePlayer {
     }
 
     /**
-     * Add 1 death to the player
+     * Add 1 death to the practice player
      */
     public void addDeath() {
         deaths++;
     }
 
     /**
-     * Gets the player kills number
+     * Gets the practice player kills number
      *
      * @return the kills number
      */
@@ -126,44 +123,23 @@ public class PracticePlayer {
     }
 
     /**
-     * Add 1 kill  to the player
+     * Add 1 kill to the practice player
      */
     public void addKill() {
         kills++;
     }
 
     /**
-     * Gets the player ratio
+     * Gets practice the player ratio
      *
      * @return the ratio
      */
     public float getRatio() {
-        return (float) getKills() / (getDeaths() == 0 ? 1 : getDeaths());
+        return PracticeNumberFormat.getAsTwoDecimalsFormat((float) getKills() / (getDeaths() == 0 ? 1 : getDeaths()));
     }
 
     /**
-     * Teleports the player in a radius of 10 blocks around the location
-     * @param location the location
-     */
-    public void teleportAroundLocation(@Nonnull Location location) {
-        Guards.checkNotNull(location, "location is null");
-
-        //Teleports the player around the location (radius of 10 blocks)
-        Random random = new Random();
-        getSpigotPlayer().get().teleport(location.clone().add(random.nextInt(10), 1, random.nextInt(10)).toHighestLocation());
-    }
-
-    /**
-     * Removes the player potion effects
-     */
-    public void removeAllPotionEffects() {
-        for (PotionEffect effect : getSpigotPlayer().get().getActivePotionEffects()) {
-            getSpigotPlayer().get().removePotionEffect(effect.getType());
-        }
-    }
-
-    /**
-     * Gets player's kits
+     * Gets the practice player kits
      *
      * @return all kits
      */
@@ -173,42 +149,42 @@ public class PracticePlayer {
     }
 
     /**
-     * Gets the player's kit named "kitname"
+     * Gets the practice player kit named "kitname"
      *
      * @param kitName the kit name
      * @return the find kit
      */
     @Nonnull
     public Optional<PracticeKit> getKit(String kitName) {
-        Guards.checkNotNull(kitName, "kitname is null");
+        Validate.notNull(kitName, "kitname is null");
 
         return getKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(kitName)).findFirst();
     }
 
     /**
-     * Adds a player's kit
+     * Adds a practice player kit
      *
      * @param kit the kit
      */
     public void addKit(PracticeKit kit) {
-        Guards.checkNotNull(kit, "kit is null");
+        Validate.notNull(kit, "kit is null");
 
         getKits().add(kit);
     }
 
     /**
-     * Removes a player's kit
+     * Removes a practice player kit
      *
      * @param kit the kit
      */
     public void removeKit(PracticeKit kit) {
-        Guards.checkNotNull(kit, "kit is null");
+        Validate.notNull(kit, "kit is null");
 
         getKits().remove(kit);
     }
 
     /**
-     * Gets the player's auto kit
+     * Gets the practice player auto kit
      *
      * @return the kit
      */
@@ -218,7 +194,7 @@ public class PracticePlayer {
     }
 
     /**
-     * Sets the player's auto kit
+     * Sets the practice player auto kit
      *
      * @param autoKit the kit
      */
@@ -227,7 +203,151 @@ public class PracticePlayer {
     }
 
     /**
-     * Gets the clickable text to open the player's inventory
+     * Gets the old practice player inventory
+     *
+     * @return the old inventory
+     */
+    @Nonnull
+    public ItemStack[] getOldInventory() {
+        return oldInventory;
+    }
+
+    /**
+     * Saves the practice player inventory
+     */
+    public void saveOldInventory() {
+        oldInventory = PracticeKitManager.getPracticePlayerInventoryAsKit(this);
+    }
+
+    /**
+     * Saves the practice player inventory
+     *
+     * @param items the inventory items
+     */
+    public void saveOldInventory(@Nonnull ItemStack[] items) {
+        Validate.notNull(items, "items is null");
+
+        oldInventory = items;
+    }
+
+    /**
+     * Gets the item from slot "slot" of the practice player inventory
+     *
+     * @param slot the inventory slot
+     * @return the item
+     */
+    @Nullable
+    public ItemStack getItem(int slot) {
+        ItemStack item = getSpigotPlayer().getInventory().getItem(slot);
+        return item == null ? null : item.clone();
+    }
+
+    /**
+     * Sets the item from slot "slot" of the practice player inventory
+     *
+     * @param slot the inventory slot
+     * @param item the item
+     */
+    public void setItem(int slot, @Nullable ItemStack item) {
+        getSpigotPlayer().getInventory().setItem(slot, item);
+    }
+
+    /**
+     * Opens an inventory to the practice player
+     *
+     * @param inventory the inventory
+     */
+    public void openInventory(@Nonnull Inventory inventory) {
+        Validate.notNull(inventory, "inventory is null");
+
+        getSpigotPlayer().openInventory(inventory);
+    }
+
+    /**
+     * Gets the practice player location
+     * @return the practice player location
+     */
+    @Nonnull
+    public Location getLocation() {
+        return getSpigotPlayer().getLocation().clone();
+    }
+
+    /**
+     * Teleports the practice player in a radius of 10 blocks around the location
+     *
+     * @param location the location
+     */
+    public void teleportAroundLocation(@Nonnull Location location) {
+        Validate.notNull(location, "location is null");
+
+        //Teleports the player around the location (radius of 10 blocks)
+        Random random = new Random();
+        getSpigotPlayer().teleport(location.clone().add(random.nextInt(10), 0, random.nextInt(10)).toHighestLocation().add(0, 1, 0));
+    }
+
+    /**
+     * Teleports the practice player to the spawn
+     */
+    public void teleportToTheSpawn() {
+
+        //Gets and teleports the player to the spawn
+        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn", "world:0:0:0:0:0"));
+        getSpigotPlayer().teleport(spawn);
+
+        //Sends the message
+        sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
+    }
+
+    /**
+     * Gets the practice player health information
+     * @return the practice player health information
+     */
+    @Nonnull
+    public String getHealthInformation() {
+        return ChatColor.GOLD + "Health: " + ChatColor.RED + getSpigotPlayer().getHealth();
+    }
+
+    /**
+     * Gets the practice player active potion effects information
+     * @return the practice player active potion effects information
+     */
+    public List<String> getActivePotionEffectsInformation() {
+        return getSpigotPlayer().getActivePotionEffects().stream().map(potion -> ChatColor.YELLOW + potion.getType().getName().replace("_", " ")).collect(Collectors.toList());
+    }
+
+    /**
+     * Removes the practice player potion effects
+     */
+    public void removeAllPotionEffects() {
+        for (PotionEffect effect : getSpigotPlayer().getActivePotionEffects()) {
+            getSpigotPlayer().removePotionEffect(effect.getType());
+        }
+    }
+
+    /**
+     * Gives a potion effect to the practice player
+     *
+     * @param potionEffect the potion effect
+     */
+    public void addPotionEffect(@Nonnull PotionEffect potionEffect) {
+        Validate.notNull(potionEffect, "potionEffect is null");
+
+        getSpigotPlayer().addPotionEffect(potionEffect);
+    }
+
+    /**
+     * Gives or removes the flight permission to the practice player
+     *
+     * @param allowFlight the allow flight statue
+     */
+    public void setAllowFlight(boolean allowFlight) {
+        getSpigotPlayer().setAllowFlight(allowFlight);
+    }
+
+
+    /**
+     * Gets the clickable text to open the practice player inventory
+     *
      * @return the clickable text
      */
     @Nonnull
@@ -237,73 +357,66 @@ public class PracticePlayer {
         return clickableInventoryAccess;
     }
 
+    /**
+     * Sends a message to the practice player
+     *
+     * @param message the message
+     */
     public void sendMessage(BaseComponent[] message) {
-        getSpigotPlayer().get().sendMessage(message);
+        getSpigotPlayer().sendMessage(message);
     }
 
+    /**
+     * Sends a message to the practice player
+     *
+     * @param message the message
+     */
+    public void sendMessage(TextComponent message) {
+        getSpigotPlayer().sendMessage(message);
+    }
+
+    /**
+     * Sends a message to the practice player
+     *
+     * @param message the message
+     */
     public void sendMessage(String message) {
-        getSpigotPlayer().get().sendMessage(message);
+        getSpigotPlayer().sendMessage(message);
     }
 
-    public void addPotionEffect(PotionEffect potionEffect) {
-        getSpigotPlayer().get().addPotionEffect(potionEffect);
-    }
+    /**
+     * Sets the practice player name tag
+     *
+     * @param name the practice player name
+     */
+    public void changeName(@Nonnull String name) {
+        Validate.notNull(name, "name is null");
 
-    public void setAllowFlight(boolean allowFlight) {
-        getSpigotPlayer().get().setAllowFlight(allowFlight);
-    }
+        EntityPlayer viewer = ((CraftPlayer) getSpigotPlayer()).getHandle();
+        for (Player player : Bukkit.getOnlinePlayers()) {
 
-    public ItemStack getItem(int slot) {
-        ItemStack item = getSpigotPlayer().get().getInventory().getItem(slot);
-        return item == null ? null : item.clone();
-    }
+            if (player != getSpigotPlayer()) {
 
-    public void setItem(int slot, ItemStack item) {
-        getSpigotPlayer().get().getInventory().setItem(slot, item);
-    }
+                PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
 
-    public void teleportToTheSpawn() {
-        //Gets and teleports the player to the spawn
-        Location spawn = PracticeLocationUtil.getAsLocation(PracticeSettings.getConfiguration().getString("spawn"));
-        getSpigotPlayer().get().teleport(spawn);
+                //Removes the practice player
+                connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, viewer));
 
-        //Sends the message
-        sendMessage(ChatColor.GREEN + "Teleportation to the spawn...");
-        PracticeKitManager.givePracticeKit(this, new PracticeKit("oldInventory", getOldInventory()));
-    }
+                //Sets the practice player name
+                GameProfile gp = ((CraftPlayer) getSpigotPlayer()).getProfile();
+                try {
+                    Field nameField = GameProfile.class.getDeclaredField("name");
+                    nameField.setAccessible(true);
+                    nameField.set(gp, name);
+                } catch (IllegalAccessException | NoSuchFieldException e) {
+                    e.printStackTrace();
+                }
 
-    public   ItemStack[] getOldInventory() {
-        return oldInventory;
-    }
-
-    public void saveOldInventory() {
-        oldInventory = PracticeKitManager.getPlayerInventoryAsKit(this);
-    }
-
-    public void saveOldInventory(ItemStack[] items) {
-        oldInventory = items;
-    }
-
-    public void changeName(String name){
-        Player viewer = getSpigotPlayer().get();
-        for(Player player : Bukkit.getOnlinePlayers()){
-            if(player == viewer) continue ;
-            // SUPPRIME LE JOUEUR
-            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, ((CraftPlayer)viewer).getHandle()));
-            // MODIFIE LE PROFIL DE JEU DU JOUEUR
-            GameProfile gp = ((CraftPlayer)viewer).getProfile();
-            try {
-                Field nameField = GameProfile.class.getDeclaredField("name");
-                nameField.setAccessible(true);
-
-                nameField.set(gp, name);
-            } catch (IllegalAccessException | NoSuchFieldException ex) {
-                throw new IllegalStateException(ex);
+                //Adds the practice player
+                connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, viewer));
+                connection.sendPacket(new PacketPlayOutEntityDestroy(getSpigotPlayer().getEntityId()));
+                connection.sendPacket(new PacketPlayOutNamedEntitySpawn(viewer));
             }
-            //AJOUTE LE JOUEUR
-            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, ((CraftPlayer)viewer).getHandle()));
-            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityDestroy(viewer.getEntityId()));
-            ((CraftPlayer)player).getHandle().playerConnection.sendPacket(new PacketPlayOutNamedEntitySpawn(((CraftPlayer)viewer).getHandle()));
         }
     }
 
@@ -311,11 +424,12 @@ public class PracticePlayer {
      * {@inheritDoc}
      */
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof PracticePlayer)) {
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PracticePlayer)) {
             return false;
         }
-        PracticePlayer testedPracticePlayer = (PracticePlayer) o;
+
+        PracticePlayer testedPracticePlayer = (PracticePlayer) obj;
         return testedPracticePlayer.getUuid().equals(getUuid());
     }
 

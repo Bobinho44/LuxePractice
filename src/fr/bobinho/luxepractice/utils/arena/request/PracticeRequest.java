@@ -1,18 +1,27 @@
 package fr.bobinho.luxepractice.utils.arena.request;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import org.atlanmod.commons.Guards;
+import org.apache.commons.lang.Validate;
+
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
 public class PracticeRequest {
 
+    /**
+     * Fields
+     */
     private final PracticePlayer practiceSender;
     private final PracticePlayer practiceReceiver;
 
+    /**
+     * Creates a new practice request
+     * @param practiceSender the practice sender
+     * @param practiceReceiver the practice receiver
+     */
     public PracticeRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Guards.checkNotNull(practiceSender, "practiceSender is null");
-        Guards.checkNotNull(practiceReceiver, "practiceReceiver is null");
+        Validate.notNull(practiceSender, "practiceSender is null");
+        Validate.notNull(practiceReceiver, "practiceReceiver is null");
 
         this.practiceSender = practiceSender;
         this.practiceReceiver = practiceReceiver;
@@ -20,6 +29,7 @@ public class PracticeRequest {
 
     /**
      * Gets the request sender
+     *
      * @return the sender
      */
     public PracticePlayer getPracticeSender() {
@@ -28,6 +38,7 @@ public class PracticeRequest {
 
     /**
      * Gets the request receiver
+     *
      * @return the receiver
      */
     public PracticePlayer getPracticeReceiver() {
@@ -39,7 +50,7 @@ public class PracticeRequest {
      */
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof  PracticeRequest)) {
+        if (!(o instanceof PracticeRequest)) {
             return false;
         }
         PracticeRequest testedPracticeRequest = (PracticeRequest) o;

@@ -6,7 +6,6 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import fr.bobinho.luxepractice.utils.arena.team.PracticeTeam;
 import fr.bobinho.luxepractice.utils.arena.request.PracticeTeamInviteRequestManager;
 import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
-import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -28,39 +27,39 @@ public class TeamInviteCommand extends BaseCommand {
     @CommandPermission("luxepractice.teaminvite")
     public void onTeamInviteCommand(CommandSender commandSender, @Single OnlinePlayer commandTarget) {
         if (commandSender instanceof Player) {
-            Player sender = (Player) commandSender;
-            Player receiver = commandTarget.getPlayer();
-            PracticePlayer practiceSender = PracticePlayerManager.getPracticePlayer(sender.getUniqueId());
-            PracticePlayer practiceReceiver = PracticePlayerManager.getPracticePlayer(receiver.getUniqueId());
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender -> {
+                PracticePlayerManager.getPracticePlayer(commandTarget.getPlayer().getUniqueId()).ifPresent(practiceReceiver -> {
 
-            //Checks if the practice sender has a practice team
-            if (!PracticeTeamManager.hasPracticeTeam(practiceSender)) {
-                sender.sendMessage(ChatColor.RED + "You doesn't have a team!");
-                return;
-            }
+                    //Checks if the practice sender has a practice team
+                    if (!PracticeTeamManager.hasPracticeTeam(practiceSender)) {
+                        practiceSender.sendMessage(ChatColor.RED + "You doesn't have a team!");
+                        return;
+                    }
 
-            //Checks if the practice sender is the leader of his practice team
-            if (!PracticeTeamManager.isItPracticeTeamLeader(practiceSender)) {
-                sender.sendMessage(ChatColor.RED + "You are not the leader of your team.");
-                return;
-            }
+                    //Checks if the practice sender is the leader of his practice team
+                    if (!PracticeTeamManager.isItPracticeTeamLeader(practiceSender)) {
+                        practiceSender.sendMessage(ChatColor.RED + "You are not the leader of your team.");
+                        return;
+                    }
 
-            //Checks if the practice sender has already sent a practice team invite request
-            if (PracticeTeamInviteRequestManager.isItPracticeTeamInviteRequest(practiceSender, practiceReceiver)) {
-                sender.sendMessage(ChatColor.RED + "You have already sent a request to " + receiver.getName() + "!");
-                return;
-            }
+                    //Checks if the practice sender has already sent a practice team invite request
+                    if (PracticeTeamInviteRequestManager.isItPracticeTeamInviteRequest(practiceSender, practiceReceiver)) {
+                        practiceSender.sendMessage(ChatColor.RED + "You have already sent a request to " + practiceReceiver.getName() + "!");
+                        return;
+                    }
 
-            //Sends a practice team invite request
-            PracticeTeamInviteRequestManager.sendPracticeTeamInviteRequest(practiceSender, practiceReceiver);
+                    //Sends a practice team invite request
+                    PracticeTeamInviteRequestManager.sendPracticeTeamInviteRequest(practiceSender, practiceReceiver);
 
-            //Messages
-            sender.sendMessage(ChatColor.GREEN + "You have sent an invitation to join your team to " + receiver.getName() + ".");
-            TextComponent request = new TextComponent(ChatColor.GREEN + "You have received an invitation to join the " + sender.getName() + " team." +
-                    ChatColor.GREEN + "\nClick this message or type " +
-                    ChatColor.YELLOW + "/teamjoin " + sender.getName() + ChatColor.GREEN + " to accept.");
-            request.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/teamjoin " + sender.getName()));
-            receiver.sendMessage(request);
+                    //Messages
+                    practiceSender.sendMessage(ChatColor.GREEN + "You have sent an invitation to join your team to " + practiceReceiver.getName() + ".");
+                    TextComponent request = new TextComponent(ChatColor.GREEN + "You have received an invitation to join the " + practiceSender.getName() + " team." +
+                            ChatColor.GREEN + "\nClick this message or type " +
+                            ChatColor.YELLOW + "/teaminvite accept " + practiceSender.getName() + ChatColor.GREEN + " to accept.");
+                    request.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/teaminvite accept " + practiceSender.getName()));
+                    practiceReceiver.sendMessage(request);
+                });
+            });
         }
     }
 
@@ -74,37 +73,38 @@ public class TeamInviteCommand extends BaseCommand {
     @CommandPermission("luxepractice.teaminvite")
     public void onTeamInviteAcceptCommand(CommandSender commandSender, @Single OnlinePlayer commandTarget) {
         if (commandSender instanceof Player) {
-            Player sender = (Player) commandSender;
-            Player receiver = commandTarget.getPlayer();
-            PracticePlayer practiceSender = PracticePlayerManager.getPracticePlayer(sender.getUniqueId());
-            PracticePlayer practiceReceiver = PracticePlayerManager.getPracticePlayer(receiver.getUniqueId());
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender -> {
+                PracticePlayerManager.getPracticePlayer(commandTarget.getPlayer().getUniqueId()).ifPresent(practiceReceiver -> {
 
-            //Checks if the practice sender has a practice team
-            if (PracticeTeamManager.hasPracticeTeam(practiceSender)) {
-                sender.sendMessage(ChatColor.RED + "You already have a team!");
-                return;
-            }
+                    //Checks if the practice sender has a practice team
+                    if (PracticeTeamManager.hasPracticeTeam(practiceSender)) {
+                        practiceSender.sendMessage(ChatColor.RED + "You already have a team!");
+                        return;
+                    }
 
-            //Checks if the practice sender has a practice team
-            if (!PracticeTeamManager.hasPracticeTeam(practiceReceiver)) {
-                sender.sendMessage(ChatColor.RED + receiver.getName() + " doesn't have a team.");
-                return;
-            }
+                    //Checks if the practice sender has a practice team
+                    if (!PracticeTeamManager.hasPracticeTeam(practiceReceiver)) {
+                        practiceSender.sendMessage(ChatColor.RED + practiceReceiver.getName() + " doesn't have a team.");
+                        return;
+                    }
 
-            //Checks if the practice sender have a practice team invite request
-            if (PracticeTeamInviteRequestManager.isItPracticeTeamInviteRequest(practiceReceiver, practiceSender)) {
-                sender.sendMessage(ChatColor.RED + "You doesn't have request from " + receiver.getName() + "!");
-                return;
-            }
+                    //Checks if the practice sender have a practice team invite request
+                    if (!PracticeTeamInviteRequestManager.isItPracticeTeamInviteRequest(practiceReceiver, practiceSender)) {
+                        practiceSender.sendMessage(ChatColor.RED + "You doesn't have request from " + practiceReceiver.getName() + "!");
+                        return;
+                    }
 
-            //Gets the practice team
-            PracticeTeam practiceTeam = PracticeTeamManager.getPracticePlayerTeam(practiceReceiver).get();
+                    //Gets the practice team
+                    PracticeTeam practiceTeam = PracticeTeamManager.getPracticeTeam(practiceReceiver).get();
 
-            //Messages
-            sender.sendMessage(ChatColor.GREEN + "You have join the " + practiceTeam.getLeader().getName() + "team.");
-            PracticeTeamManager.sendMessageToPracticeTeamMembers(practiceSender, ChatColor.GREEN + sender.getName() + " joined the team.");
+                    //Sends the message
+                    practiceSender.sendMessage(ChatColor.GREEN + "You have join the " + practiceTeam.getLeader().getName() + "team.");
+                    PracticeTeamManager.sendMessageToPracticeTeamMembers(practiceReceiver, ChatColor.GREEN + practiceSender.getName() + " joined the team.");
 
-            practiceTeam.addMember(practiceSender);
+                    //Joins the practice team
+                    PracticeTeamManager.joinPracticeTeam(practiceSender, practiceTeam);
+                });
+            });
         }
     }
 

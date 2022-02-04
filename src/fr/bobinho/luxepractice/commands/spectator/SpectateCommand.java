@@ -4,7 +4,6 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
-import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -16,33 +15,33 @@ public class SpectateCommand extends BaseCommand {
     /**
      * Command spectate
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/spectate <player>")
     @CommandPermission("luxepractice.spectate")
-    public void onDefault(CommandSender sender, @Single OnlinePlayer player) {
-        if (sender instanceof Player) {
-            Player viewer = (Player) sender;
-            PracticePlayer practiceViewer = PracticePlayerManager.getPracticePlayer(viewer.getUniqueId());
-            PracticePlayer practiceStreamer = PracticePlayerManager.getPracticePlayer(player.getPlayer().getUniqueId());
+    public void onSpectateCommand(CommandSender commandSender, @Single OnlinePlayer player) {
+        if (commandSender instanceof Player) {
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender ->
+                    PracticePlayerManager.getPracticePlayer(player.getPlayer().getUniqueId()).ifPresent(practiceReceiver -> {
 
-            //Checks if the selected player is in an arena
-            if (!PracticeMatchManager.isInMatch(practiceStreamer)) {
-                viewer.sendMessage(ChatColor.RED + practiceStreamer.getName() + "is not in an arena!");
-                return;
-            }
+                //Checks if the selected player is in an arena
+                if (!PracticeMatchManager.isInMatch(practiceReceiver)) {
+                    practiceSender.sendMessage(ChatColor.RED + practiceReceiver.getName() + "is not in an arena!");
+                    return;
+                }
 
-            //Checks if the selected player is in an arena
-            if (PracticeMatchManager.isInMatch(practiceViewer)) {
-                PracticeMatchManager.getMatch(practiceViewer).get().removeSpectator(practiceViewer);
-            }
+                //Checks if the selected player is in an arena
+                if (PracticeMatchManager.isInMatch(practiceSender)) {
+                    PracticeMatchManager.getPracticeMatch(practiceSender).get().removeSpectator(practiceSender);
+                }
 
-            //Creates the arena
-            PracticeMatchManager.addSpectator(practiceViewer, practiceStreamer);
+                //Creates the arena
+                PracticeMatchManager.addSpectator(practiceSender, practiceReceiver);
 
-            //Sends the message
-            viewer.sendMessage(ChatColor.GREEN + "You are watching the " + practiceStreamer.getName() + "match.");
+                //Sends the message
+                practiceSender.sendMessage(ChatColor.GREEN + "You are watching the " + practiceReceiver.getName() + "match.");
+            }));
         }
     }
 

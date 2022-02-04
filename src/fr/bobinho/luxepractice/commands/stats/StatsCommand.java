@@ -15,24 +15,24 @@ public class StatsCommand extends BaseCommand {
     /**
      * Command stats
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/stats")
     @CommandPermission("luxepractice.stats")
-    public void onDefault(CommandSender sender, @Optional OnlinePlayer target) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(target == null ? player.getUniqueId() : target.player.getUniqueId());
+    public void onStatsCommand(CommandSender commandSender, @Optional OnlinePlayer commandTarget) {
+        if (commandSender instanceof Player) {
+            PracticePlayerManager.getPracticePlayer((commandTarget == null ? ((Player) commandSender): commandTarget.getPlayer()).getUniqueId()).ifPresent(practicePlayer -> {
 
-            //Gets player's stats
-            String stats = ChatColor.GOLD + sender.getName() + "'s stats:" + "\n" +
-                    ChatColor.GOLD + "Kills: " + ChatColor.YELLOW + practicePlayer.getKills() + "\n" +
-                    ChatColor.GOLD + "Deaths: " + ChatColor.YELLOW + practicePlayer.getDeaths() + "\n" +
-                    ChatColor.GOLD + "KDR: " + ChatColor.YELLOW + practicePlayer.getRatio() + "\n";
+                //Gets the target practice player stats
+                String stats = ChatColor.GOLD + practicePlayer.getName() + "'s stats:" + "\n" +
+                        ChatColor.GOLD + "Kills: " + ChatColor.YELLOW + practicePlayer.getKills() + "\n" +
+                        ChatColor.GOLD + "Deaths: " + ChatColor.YELLOW + practicePlayer.getDeaths() + "\n" +
+                        ChatColor.GOLD + "KDR: " + ChatColor.YELLOW + practicePlayer.getRatio() + "\n";
 
-            //Sends player's stats
-            player.sendMessage(stats);
+                //Sends the target practice player stats
+                commandSender.sendMessage(stats);
+            });
         }
     }
 

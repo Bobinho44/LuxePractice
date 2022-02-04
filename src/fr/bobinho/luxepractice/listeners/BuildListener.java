@@ -14,7 +14,7 @@ public class BuildListener implements Listener {
      * @param e the block place event
      */
     @EventHandler
-    public void onPlace(BlockPlaceEvent e) {
+    public void onPlaceBlock(BlockPlaceEvent e) {
         if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             e.setCancelled(true);
         }
@@ -26,7 +26,7 @@ public class BuildListener implements Listener {
      * @param e the block break event
      */
     @EventHandler
-    public void onBreak(BlockBreakEvent e) {
+    public void onBreakBlock(BlockBreakEvent e) {
         if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
             e.setCancelled(true);
         }

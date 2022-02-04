@@ -1,115 +1,262 @@
 package fr.bobinho.luxepractice.utils.arena.match;
 
+import com.google.common.collect.Sets;
 import fr.bobinho.luxepractice.utils.arena.PracticeArena;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
+import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.atlanmod.commons.Guards;
+import org.apache.commons.lang.Validate;
 import org.atlanmod.commons.time.Stopwatch;
-import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public abstract class PracticeMatch {
 
+    /**
+     * Fields
+     */
     private final PracticeArena arena;
-    private final List<PracticePlayer> spectators;
-    private final List<PracticePlayer> deathPracticePlayers;
+    private final Set<PracticePlayer> spectators = new HashSet<>();
+    private final List<PracticePlayer> fighters = new ArrayList<>();
+    private final Set<PracticePlayer> deadFighter = new HashSet<>();
     private final Stopwatch duration;
-    private boolean isEnded = false;
+    private boolean isFinished = false;
 
-    protected PracticeMatch(@Nonnull PracticeArena arena) {
-        Guards.checkNotNull(arena, "arena is null");
+    /**
+     * Creates a new practice match
+     *
+     * @param arena the practice arena
+     */
+    public PracticeMatch(@Nonnull PracticeArena arena) {
+        Validate.notNull(arena, "arena is null");
 
         this.arena = arena;
         this.duration = Stopwatch.createStarted();
-        this.spectators = new ArrayList<PracticePlayer>();
-        this.deathPracticePlayers = new ArrayList<PracticePlayer>();
-
-        PracticeMatchManager.createPracticeMatch(this);
     }
 
-    public void setEnd() {
-        isEnded = true;
-    }
-
-    public boolean isEnded() {
-        return isEnded;
-    }
-
-    public List<PracticePlayer> getDeathPracticePlayers() {
-        return deathPracticePlayers;
-    }
-
-    public void addDeathPracticePlayers(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkArgument(!isDeadFighter(practicePlayer), "practicePlayer is already dead");
-
-        getDeathPracticePlayers().add(practicePlayer);
-
-        PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
-        if (isFinished()) {
-            end();
-        }
-    }
-
-    public boolean isDeadFighter(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-
-        return getDeathPracticePlayers().contains(practicePlayer);
-    }
-
-    public List<PracticePlayer> getSpectators() {
-        return spectators;
-    }
-
-    public void addSpectator(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-
-        getSpectators().add(practicePlayer);
-    }
-
-    public void removeSpectator(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkArgument(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
-
-        getSpectators().remove(practicePlayer);
-        if (isEnded() && getSpectators().size() == 0) {
-            PracticeMatchManager.deletePracticeMatch(this);
-        }
-    }
-
-    public boolean isSpectator(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkArgument(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
-
-        return getSpectators().contains(practicePlayer);
-    }
+    /**
+     * Gets the practice arena
+     *
+     * @return the practice arena
+     */
+    @Nonnull
     public PracticeArena getArena() {
         return arena;
     }
 
+    /**
+     * Gets the practice match spectators
+     *
+     * @return the practice match spectators
+     */
+    @Nonnull
+    public Set<PracticePlayer> getSpectators() {
+        return spectators;
+    }
+
+    /**
+     * Checks if the practice player is a practice match spectator
+     *
+     * @param practicePlayer the practice player
+     * @return if he is a practice match spectator
+     */
+    public boolean isItSpectator(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+
+        return getSpectators().contains(practicePlayer);
+    }
+
+    /**
+     * Adds a new practice player to the practice match spectators
+     *
+     * @param practicePlayer the practice player
+     */
+    public void addSpectator(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+
+        getSpectators().add(practicePlayer);
+    }
+
+    /**
+     * Removes the practice player from the practice match spectators
+     *
+     * @param practicePlayer the practice player
+     */
+    public void removeSpectator(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+
+        getSpectators().remove(practicePlayer);
+    }
+
+    /**
+     * Gets the practice match fighter
+     *
+     * @return the practice match fighters
+     */
+    @Nonnull
+    public List<PracticePlayer> getFighters() {
+        return fighters;
+    }
+
+    /**
+     * Checks if the practice player is a practice match fighters
+     *
+     * @param practicePlayer the practice player
+     * @return if he is a practice match fighters
+     */
+    public boolean isItFighter(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+
+        return getFighters().contains(practicePlayer);
+    }
+
+    /**
+     * Adds a new practice player to the practice match fighters
+     *
+     * @param practicePlayer the practice player
+     */
+    public void addFighter(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+
+        getSpectators().add(practicePlayer);
+    }
+
+    /**
+     * Gets the practice match dead fighter
+     *
+     * @return the practice match dead fighters
+     */
+    @Nonnull
+    public Set<PracticePlayer> getDeadFighters() {
+        return deadFighter;
+    }
+
+    /**
+     * Checks if the practice player is a practice match dead fighters
+     *
+     * @param practicePlayer the practice player
+     * @return if he is a practice match dead fighters
+     */
+    public boolean isItDeadFighter(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+
+        return getFighters().contains(practicePlayer);
+    }
+
+    /**
+     * Adds a new practice player to the practice match dead fighters
+     *
+     * @param practicePlayer the practice player
+     */
+    public void addDeadFighter(@Nonnull PracticePlayer practicePlayer) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+
+        getSpectators().add(practicePlayer);
+    }
+
+    /**
+     * Gets the practice match duration
+     *
+     * @return the practice match duration
+     */
+    @Nonnull
     public Stopwatch getDuration() {
         return duration;
     }
 
-    public abstract BaseComponent[] getStartMessage(@Nonnull PracticePlayer receiver);
+    /**
+     * Checks if the practice match is finished
+     *
+     * @return if it is finished
+     */
+    public boolean isFinished() {
+        return isFinished;
+    }
 
-    public abstract BaseComponent[] getEndMessage();
+    /**
+     * Starts the practice match
+     */
+    public void start() {
+        PracticeScheduler.syncScheduler().after(30, TimeUnit.MINUTES).run(() -> {
 
-    public abstract BaseComponent[] getBroadcastMessage();
+            //Checks if the practice match is finish
+            if (mustFinish()) {
 
-    public abstract List<PracticePlayer> getALlMembers();
+                //Finishes the practice match
+                finish();
+            }
+        });
+    }
 
-    public abstract boolean isFinished();
+    /**
+     * Finishes the practice match
+     */
+    public void finish() {
+        isFinished = true;
+        PracticeMatchManager.sendMessageToAllPlayerInMatch(getFinishMessage(), this);
+        PracticeMatchManager.sendMessageToAllPlayerOutMatch(getBroadcastFinishMessage(), this);
+        getFighters().stream().filter(practiceFighter -> !isItSpectator(practiceFighter)).collect(Collectors.toList())
+                .forEach(practiceFighter -> PracticeMatchManager.addSpectator(practiceFighter, practiceFighter));
+    }
 
-    public abstract void start();
+    /**
+     * Gets all practice match members (fighters and spectators)
+     *
+     * @return all practice match members
+     */
+    @Nonnull
+    public Set<PracticePlayer> getALlMembers() {
+        return Sets.union(getSpectators(), Sets.difference(Set.copyOf(getFighters()), getDeadFighters()));
+    }
 
-    public abstract void end();
+    /**
+     * Checks if the practice match must be finished
+     *
+     * @return if it must be finished
+     */
+    public abstract boolean mustFinish();
 
-    public abstract String getMatchInfo();
+    /**
+     * Gets the practice match start message
+     *
+     * @param practiceReceiver the practice receiver
+     * @return the practice match start message
+     */
+    @Nonnull
+    public abstract BaseComponent[] getStartMessage(@Nonnull PracticePlayer practiceReceiver);
 
-    public abstract List<PracticePlayer> getFighters();
+    /**
+     * Gets the practice match finish message
+     *
+     * @return the practice match finish message
+     */
+    @Nonnull
+    public abstract BaseComponent[] getFinishMessage();
+
+    /**
+     * Gets the practice match finish broadcast message
+     *
+     * @return the practice match finish broadcast message
+     */
+    @Nonnull
+    public abstract BaseComponent[] getBroadcastFinishMessage();
+
+    /**
+     * Gets the practice match informations as string
+     *
+     * @return the practice match informations as string
+     */
+    @Nonnull
+    public abstract String getMatchInfoAsString();
 
 }

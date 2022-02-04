@@ -1,9 +1,8 @@
 package fr.bobinho.luxepractice.utils.arena.request;
 
-import fr.bobinho.luxepractice.utils.arena.request.PracticeRequest;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
-import org.atlanmod.commons.Guards;
+import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -13,15 +12,18 @@ import java.util.concurrent.TimeUnit;
 
 public class PracticeTeamInviteRequestManager {
 
-    private static final List<PracticeRequest> teamInviteRequests = new ArrayList<>();
+    /**
+     * The practice team invite requests list
+     */
+    private static final List<PracticeRequest> practiceTeamInviteRequests = new ArrayList<>();
 
     /**
      * Gets all practice team invite request
      *
      * @return the practice team invite requests
      */
-    private static List<PracticeRequest> getTeamInviteRequests() {
-        return teamInviteRequests;
+    private static List<PracticeRequest> getPracticeTeamInviteRequests() {
+        return practiceTeamInviteRequests;
     }
 
     /**
@@ -32,11 +34,11 @@ public class PracticeTeamInviteRequestManager {
      * @return the practice team invite request if found
      */
     private static Optional<PracticeRequest> getPracticeTeamInviteRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Guards.checkNotNull(practiceSender, "practiceSender is null");
-        Guards.checkNotNull(practiceReceiver, "practiceReceiver is null");
+        Validate.notNull(practiceSender, "practiceSender is null");
+        Validate.notNull(practiceReceiver, "practiceReceiver is null");
 
         //Gets the selected practice team invite request
-        return getTeamInviteRequests().stream().filter(request -> request.getPracticeSender().equals(practiceSender) && request.getPracticeSender().equals(practiceReceiver)).findFirst();
+        return getPracticeTeamInviteRequests().stream().filter(request -> request.getPracticeSender().equals(practiceSender) && request.getPracticeReceiver().equals(practiceReceiver)).findFirst();
     }
 
     /**
@@ -47,8 +49,8 @@ public class PracticeTeamInviteRequestManager {
      * @return the status of the existence of the practice team invite request
      */
     public static boolean isItPracticeTeamInviteRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Guards.checkNotNull(practiceSender, "practiceSender is null");
-        Guards.checkNotNull(practiceReceiver, "practiceReceiver is null");
+        Validate.notNull(practiceSender, "practiceSender is null");
+        Validate.notNull(practiceReceiver, "practiceReceiver is null");
 
         //Checks if the select practice team invite request exist
         return getPracticeTeamInviteRequest(practiceSender, practiceReceiver).isPresent();
@@ -61,12 +63,12 @@ public class PracticeTeamInviteRequestManager {
      * @param practiceReceiver the practice receiver
      */
     public static void sendPracticeTeamInviteRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Guards.checkNotNull(practiceSender, "practiceSender is null");
-        Guards.checkNotNull(practiceReceiver, "practiceReceiver is null");
-        Guards.checkArgument(!isItPracticeTeamInviteRequest(practiceSender, practiceReceiver), "this request has already been sent");
+        Validate.notNull(practiceSender, "practiceSender is null");
+        Validate.notNull(practiceReceiver, "practiceReceiver is null");
+        Validate.isTrue(!isItPracticeTeamInviteRequest(practiceSender, practiceReceiver), "this request has already been sent");
 
         //Creates the practice team invite request
-        getTeamInviteRequests().add(new PracticeRequest(practiceSender, practiceReceiver));
+        getPracticeTeamInviteRequests().add(new PracticeRequest(practiceSender, practiceReceiver));
 
         //Waits 60 seconds to clear the practice team invite request
         PracticeScheduler.syncScheduler().after(60, TimeUnit.SECONDS).run(() -> {
@@ -87,12 +89,12 @@ public class PracticeTeamInviteRequestManager {
      * @param practiceReceiver the practice receiver
      */
     public static void removePracticeTeamInviteRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Guards.checkNotNull(practiceSender, "practiceSender is null");
-        Guards.checkNotNull(practiceReceiver, "practiceReceiver is null");
-        Guards.checkArgument(isItPracticeTeamInviteRequest(practiceSender, practiceReceiver), "this request doesn't exist");
+        Validate.notNull(practiceSender, "practiceSender is null");
+        Validate.notNull(practiceReceiver, "practiceReceiver is null");
+        Validate.isTrue(isItPracticeTeamInviteRequest(practiceSender, practiceReceiver), "this request doesn't exist");
 
         //Removes the practice team invite request
-        getTeamInviteRequests().remove(getPracticeTeamInviteRequest(practiceSender, practiceReceiver).get());
+        getPracticeTeamInviteRequests().remove(getPracticeTeamInviteRequest(practiceSender, practiceReceiver).get());
     }
 
 }

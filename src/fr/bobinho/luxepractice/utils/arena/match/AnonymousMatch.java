@@ -5,120 +5,119 @@ import fr.bobinho.luxepractice.utils.format.PracticeDurationFormat;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.atlanmod.commons.Guards;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 public class AnonymousMatch extends PracticeMatch {
 
-    private final PracticePlayer player1;
-    private final PracticePlayer player2;
+    /**
+     * Fields
+     */
+    private final PracticePlayer fighter1;
+    private final PracticePlayer fighter2;
     private final PracticeKit kit;
     private PracticePlayer winner;
 
-    public AnonymousMatch(@NotNull PracticeArena arena, @Nonnull PracticePlayer player1, @Nonnull PracticePlayer player2, @Nonnull PracticeKit kit) {
+    /**
+     * Creates a new anonymous practice match
+     *
+     * @param arena    the practice arena
+     * @param fighter1 the practice fighter 1
+     * @param fighter2 the practice fighter 2
+     * @param kit      the practice kit
+     */
+    public AnonymousMatch(@NotNull PracticeArena arena, @Nonnull PracticePlayer fighter1, @Nonnull PracticePlayer fighter2, @Nonnull PracticeKit kit) {
         super(arena);
 
-        Guards.checkNotNull(player1, "player1 is null");
-        Guards.checkNotNull(player2, "player2 is null");
-        Guards.checkNotNull(kit, "kit is null");
+        Validate.notNull(fighter1, "fighter1 is null");
+        Validate.notNull(fighter2, "fighter2 is null");
+        Validate.notNull(kit, "kit is null");
 
-        this.player1 = player1;
-        this.player2 = player2;
+        this.fighter1 = fighter1;
+        this.fighter2 = fighter2;
         this.kit = kit;
+
+        List.of(fighter1, fighter2).forEach(this::addFighter);
+
+        //Starts the practice match
+        start();
     }
 
-    private PracticeKit getKit() {
+    /**
+     * Gets the practice match fighter 1
+     *
+     * @return the practice match fighter 1
+     */
+    @Nonnull
+    public PracticePlayer getFighter1() {
+        return fighter1;
+    }
+
+    /**
+     * Gets the practice match fighter 2
+     *
+     * @return the practice match fighter 2
+     */
+    @Nonnull
+    public PracticePlayer getFighter2() {
+        return fighter2;
+    }
+
+    /**
+     * Gets the practice match kit
+     *
+     * @return the practice match kit
+     */
+    @Nonnull
+    public PracticeKit getKit() {
         return kit;
     }
 
-    private PracticePlayer getPlayer1() {
-        return player1;
-    }
-
-    private PracticePlayer getPlayer2() {
-        return player2;
-    }
-
+    /**
+     * Gets the practice match winner
+     *
+     * @return the practice match winner
+     */
     @Nullable
-    private PracticePlayer getWinner() {
+    public PracticePlayer getWinner() {
         return winner;
     }
 
+    /**
+     * Gets the practice match looser
+     *
+     * @return the practice match looser
+     */
     @Nullable
     private PracticePlayer getLooser() {
-        return getWinner().equals(getPlayer1()) ? getPlayer2() : getPlayer1();
+        return getWinner() == null ? null : getWinner().equals(getFighter1()) ? getFighter2() : getFighter1();
     }
 
+    /**
+     * Sets the practice match winner
+     *
+     * @param winner the practice match winner
+     */
     public void setWinner(PracticePlayer winner) {
         this.winner = winner;
     }
 
-    @Override
-    public BaseComponent[] getStartMessage(@Nonnull PracticePlayer receiver) {
-        Guards.checkNotNull(receiver, "receiver is null");
-
-        return new ComponentBuilder("Anonymous match found vs ").color(ChatColor.GOLD).bold(true)
-                .append((getPlayer1().equals(receiver) ? getPlayer2() : getPlayer1()).getName()).color(ChatColor.YELLOW).bold(false)
-                .append("\nThe match will automatically end in ").color(ChatColor.GOLD)
-                .append("30 ").color(ChatColor.YELLOW)
-                .append("minutes").color(ChatColor.GOLD)
-                .append("\n\nGood luck!").color(ChatColor.GREEN).create();
-    }
-
-    @Override
-    public BaseComponent[] getEndMessage() {
-        Guards.checkNotNull(getLooser(), "looser is null");
-        Guards.checkNotNull(getWinner(), "winner is null");
-
-        return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
-                .append(getWinner().getName()).color(ChatColor.GREEN).bold(false)
-                .append("\nInventories (click to view): ").color(ChatColor.GOLD)
-                .append(getWinner().getClickableInventoryAccessAsString()).color(ChatColor.GREEN)
-                .append(", ").color(ChatColor.GRAY)
-                .append(getLooser().getClickableInventoryAccessAsString()).color(ChatColor.RED)
-                .append("\nMatch Duration: ").color(ChatColor.GOLD)
-                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed().toSeconds())).color(ChatColor.YELLOW).create();
-    }
-
-    @Override
-    public BaseComponent[] getBroadcastMessage() {
-        Guards.checkNotNull(getLooser(), "looser is null");
-        Guards.checkNotNull(getWinner(), "winner is null");
-
-        return new ComponentBuilder("[Match] ").color(ChatColor.GOLD)
-                .append(getLooser().getName()).color(ChatColor.RED)
-                .append(" was defeated by ").color(ChatColor.AQUA)
-                .append(getWinner().getName()).color(ChatColor.GREEN).create();
-    }
-
-    @Override
-    public List<PracticePlayer> getALlMembers() {
-        if (isEnded()) return getSpectators();
-        return Stream.concat(List.of(getPlayer1(), getPlayer2()).stream(), getSpectators().stream()).collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean isFinished() {
-        Bukkit.getConsoleSender().sendMessage("2222222222222222222222 " + getDeathPracticePlayers().size());
-        return getDeathPracticePlayers().size() > 0;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void start() {
+        super.start();
         for (PracticePlayer practicePlayer : getALlMembers()) {
             practicePlayer.saveOldInventory();
-
             practicePlayer.teleportAroundLocation(getArena().getSpawn());
             practicePlayer.removeAllPotionEffects();
             PracticeKitManager.givePracticeKit(practicePlayer, getKit());
@@ -126,31 +125,82 @@ public class AnonymousMatch extends PracticeMatch {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void end() {
-        setWinner(getDeathPracticePlayers().contains(getPlayer1()) ? getPlayer2() : getPlayer1());
-        for (PracticePlayer practicePlayer : getALlMembers()) {
-            if (!isDeadFighter(practicePlayer)) {
-                PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
-            }
-            practicePlayer.removeAllPotionEffects();
-            practicePlayer.sendMessage(getEndMessage());
-        }
-
-        for (Player player : Bukkit.getOnlinePlayers().stream().filter(player -> getALlMembers().contains(PracticePlayerManager.getPracticePlayer(player.getUniqueId()))).collect(Collectors.toList())) {
-            player.sendMessage(getBroadcastMessage());
-        }
-        setEnd();
+    public void finish() {
+        setWinner(getFighters().stream().filter(practiceFighter -> !getDeadFighters().contains(practiceFighter)).findFirst().get());
+        super.finish();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String getMatchInfo() {
+    public boolean mustFinish() {
+        return getDeadFighters().size() > 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Nonnull
+    public BaseComponent @NotNull [] getStartMessage(@Nonnull PracticePlayer practiceReceiver) {
+        Validate.notNull(practiceReceiver, "receiver is null");
+
+        //Creates the start message
+        return new ComponentBuilder("Anonymous match found vs ").color(ChatColor.GOLD).bold(true)
+                .append((getFighter1().equals(practiceReceiver) ? getFighter2() : getFighter1()).getName()).color(ChatColor.YELLOW).bold(false)
+                .append("\nThe match will automatically end in ").color(ChatColor.GOLD)
+                .append("30 ").color(ChatColor.YELLOW)
+                .append("minutes").color(ChatColor.GOLD)
+                .append("\n\nGood luck!").color(ChatColor.GREEN).create();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Nonnull
+    public BaseComponent[] getFinishMessage() {
+        Validate.notNull(getWinner(), "winner is null");
+
+        //Creates the finish message
+        return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
+                .append(getWinner().getName()).color(ChatColor.GREEN).bold(false)
+                .append("\nInventories (click to view): ").color(ChatColor.GOLD)
+                .append(getWinner().getClickableInventoryAccessAsString()).color(ChatColor.GREEN)
+                .append(", ").color(ChatColor.GRAY)
+                .append(Objects.requireNonNull(getLooser()).getClickableInventoryAccessAsString()).color(ChatColor.RED)
+                .append("\nMatch Duration: ").color(ChatColor.GOLD)
+                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed().toSeconds())).color(ChatColor.YELLOW).create();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Nonnull
+    public BaseComponent[] getBroadcastFinishMessage() {
+        Validate.notNull(getWinner(), "winner is null");
+
+        //Gets the broadcast finish message
+        return new ComponentBuilder("[Match] ").color(ChatColor.GOLD)
+                .append(Objects.requireNonNull(getLooser()).getName()).color(ChatColor.RED)
+                .append(" was defeated by ").color(ChatColor.AQUA)
+                .append(getWinner().getName()).color(ChatColor.GREEN).create();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Nonnull
+    public String getMatchInfoAsString() {
         return ChatColor.GOLD + "Match: " + ChatColor.GREEN + (getWinner() != null ? "Winner : " + getWinner().getName() : "Not finished");
     }
 
-    @Override
-    public List<PracticePlayer> getFighters() {
-        return List.of(getPlayer1(), getPlayer2());
-    }
 
 }

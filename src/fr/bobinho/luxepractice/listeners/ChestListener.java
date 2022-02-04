@@ -1,10 +1,9 @@
 package fr.bobinho.luxepractice.listeners;
 
 import fr.bobinho.luxepractice.utils.chest.PracticeChestManager;
+import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -20,20 +19,20 @@ public class ChestListener implements Listener {
      */
     @EventHandler
     public void onOpenChest(PlayerInteractEvent e) {
-        Block clickedBlock = e.getClickedBlock();
-        Player player = e.getPlayer();
+        PracticePlayerManager.getPracticePlayer(e.getPlayer().getUniqueId()).ifPresent(practicePlayer -> {
 
-        //Checks if the clicked block is a chest
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && clickedBlock != null && clickedBlock.getType() == Material.CHEST) {
+            //Checks if the clicked block is a chest
+            if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.CHEST) {
 
-            //Checks if the clicked chest is a practice chest
-            if (PracticeChestManager.isItPracticeChest(clickedBlock.getLocation())) {
+                //Checks if the clicked chest is a practice chest
+                if (PracticeChestManager.isItPracticeChest(e.getClickedBlock().getLocation())) {
 
-                //Opens the practice chest
-                PracticeChestManager.openPracticeChest(player, (Chest) clickedBlock.getState());
-                e.setCancelled(true);
+                    //Opens the practice chest
+                    PracticeChestManager.openPracticeChest(practicePlayer, (Chest) e.getClickedBlock().getState());
+                    e.setCancelled(true);
+                }
             }
-        }
+        });
     }
 
     /**

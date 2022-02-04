@@ -4,7 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.arena.PracticeArena;
 import fr.bobinho.luxepractice.utils.arena.PracticeArenaManager;
-import fr.bobinho.luxepractice.utils.arena.request.PracticeWaitList;
+import fr.bobinho.luxepractice.utils.arena.request.PracticeWaitListManager;
 import fr.bobinho.luxepractice.utils.arena.match.AnonymousMatch;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
@@ -22,59 +22,47 @@ public class MatchCommand extends BaseCommand {
     /**
      * Command match
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/match <kit>")
     @CommandPermission("luxepractice.match")
-    public void onDefault(CommandSender sender, @Optional String kitName) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
+    public void onDefault(CommandSender commandSender, @Optional String name) {
+        if (commandSender instanceof Player) {
 
-            if (kitName == null && PracticeKitManager.getMainDefaultPracticeKit().isEmpty()) {
-                player.sendMessage(ChatColor.RED + "There is no default kit defined!");
-                return;
-            }
+            final String kitName = name != null ? name : PracticeKitManager.getDefaultBasicPracticeKit().get().getName();
 
-            if (kitName != null && PracticeKitManager.getDefaultPracticeKit(kitName).isEmpty()) {
-                player.sendMessage(ChatColor.RED + "The kit named " + kitName + " does not exist!");
-                return;
-            }
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender -> {
 
-            if (kitName == null) {
-                kitName = PracticeKitManager.getMainDefaultPracticeKit().get().getName();
-            }
+                if (PracticeKitManager.getBasicPracticeKit(kitName).isEmpty()) {
+                    practiceSender.sendMessage(ChatColor.RED + "The kit named " + kitName + " does not exist!");
+                    return;
+                }
 
-            if (PracticeMatchManager.isInMatch(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You are already in an arena. Leave it to look for a match!");
-                return;
-            }
+                if (PracticeMatchManager.isInMatch(practiceSender)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You are already in an arena. Leave it to look for a match!");
+                    return;
+                }
 
-            if (!PracticeArenaManager.isThereFreeArena()) {
-                player.sendMessage(ChatColor.RED + "No arena is available at the moment. Please try again later!");
-                return;
-            }
+                if (PracticeArenaManager.isThereFreeArena()) {
+                    practiceSender.sendMessage(ChatColor.RED + "No arena is available at the moment. Please try again later!");
+                    return;
+                }
 
-            if (PracticeWaitList.isAlreadyInThePracticeWaitList(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You are already on the waiting list for a match!");
-                return;
-            }
+                if (PracticeWaitListManager.isAlreadyInThePracticeWaitList(practiceSender)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You are already on the waiting list for a match!");
+                    return;
+                }
 
-            if (!PracticeWaitList.isThereAvailablePracticePlayer(kitName)) {
-                PracticeWaitList.addPracticePlayerToTheWaitList(practicePlayer, kitName);
-                Bukkit.getConsoleSender().sendMessage("AAAAAAAAAAAAAAAAAAAAA");
-                player.sendMessage(ChatColor.GOLD + "Searching for an opponent in kit +" + ChatColor.YELLOW + kitName);
-                return;
-            }
-            Bukkit.getConsoleSender().sendMessage("BBBBBBBBBBBBBBBBBBBBBBBBBBB");
-            PracticePlayer practiceOpponent = PracticeWaitList.getPracticePlayerFromTheWaitList(kitName).get();
-            PracticeArena arena = PracticeArenaManager.getFreePracticeArena().get();
-            PracticeKit kit = PracticeKitManager.getDefaultPracticeKit(kitName).get();
+                if (!PracticeWaitListManager.isThereAvailablePracticePlayer(kitName)) {
+                    PracticeWaitListManager.addPracticePlayerToTheWaitList(practiceSender, kitName);
+                    practiceSender.sendMessage(ChatColor.GOLD + "Searching for an opponent in kit +" + ChatColor.YELLOW + kitName);
+                    return;
+                }
 
-            AnonymousMatch match = new AnonymousMatch(arena, practicePlayer, practiceOpponent, kit);
-
-            match.start();
+                //Creates a new practice anonymous match
+                PracticeMatchManager.createPracticeAnonymousMatch(practiceSender, kitName);
+            });
         }
     }
 

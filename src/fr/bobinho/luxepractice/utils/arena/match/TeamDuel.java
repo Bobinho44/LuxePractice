@@ -4,35 +4,40 @@ import fr.bobinho.luxepractice.utils.arena.PracticeArena;
 import fr.bobinho.luxepractice.utils.arena.team.PracticeTeam;
 import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
 import fr.bobinho.luxepractice.utils.format.PracticeDurationFormat;
-import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.apache.commons.lang.time.DurationFormatUtils;
-import org.atlanmod.commons.Guards;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.apache.commons.lang.Validate;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TeamDuel extends PracticeMatch {
 
+    /**
+     * Fields
+     */
     private final PracticeTeam blue;
     private final PracticeTeam red;
     private PracticeTeam winner;
 
+    /**
+     * Creates a new team duel practice match
+     *
+     * @param arena the practice arena
+     * @param blue  the blue practice team
+     * @param red   the red practice team
+     */
     public TeamDuel(@Nonnull PracticeArena arena, @Nonnull PracticeTeam blue, @Nonnull PracticeTeam red) {
         super(arena);
 
-        Guards.checkNotNull(blue, "blue is null");
-        Guards.checkNotNull(red, "red is null");
+        Validate.notNull(blue, "blue is null");
+        Validate.notNull(red, "red is null");
 
         this.blue = blue;
         this.blue.setName("Blue Team");
@@ -40,38 +45,111 @@ public class TeamDuel extends PracticeMatch {
         this.red = red;
         this.red.setName("Red Team");
         this.red.setColor(ChatColor.RED);
+
+        Stream.concat(blue.getMembers().stream(), red.getMembers().stream()).collect(Collectors.toSet()).forEach(this::addFighter);
+
+        //Starts the practice match
+        start();
     }
 
-    private PracticeTeam getBlueTeam() {
+    /**
+     * Gets the practice match blue practice team
+     *
+     * @return the practice match blue practice team
+     */
+    @Nonnull
+    public PracticeTeam getBlueTeam() {
         return blue;
     }
 
-    private PracticeTeam getRedTeam() {
+    /**
+     * Gets the practice match red practice team
+     *
+     * @return the practice match red practice team
+     */
+    @Nonnull
+    public PracticeTeam getRedTeam() {
         return red;
     }
 
+    private int getLivingPracticePlayerNumber(@Nonnull PracticeTeam practiceTeam) {
+        Validate.notNull(practiceTeam, "practiceTeam is null");
+
+        return (int) practiceTeam.getMembers().stream().filter(member -> !getDeadFighters().contains(member)).count();
+    }
+
+    /**
+     * Gets the practice match winner
+     *
+     * @return the practice match winner
+     */
     @Nullable
-    private PracticeTeam getWinner() {
+    public PracticeTeam getWinner() {
         return winner;
     }
 
+    /**
+     * Gets the practice match looser
+     *
+     * @return the practice match looser
+     */
     @Nullable
     private PracticeTeam getLooser() {
-        return winner.equals(getBlueTeam()) ? getRedTeam() : getBlueTeam();
+        return getWinner() == null ? null : getWinner().equals(getBlueTeam()) ? getRedTeam() : getBlueTeam();
     }
 
+    /**
+     * Sets the practice match winner
+     *
+     * @param winner the practice match winner
+     */
     public void setWinner(PracticeTeam winner) {
         this.winner = winner;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public BaseComponent[] getStartMessage(@Nonnull PracticePlayer receiver) {
-        Guards.checkNotNull(receiver, "receiver is null");
-        Guards.checkArgument(PracticeTeamManager.hasPracticeTeam(receiver), "receiver doesn't have team");
+    public void start() {
+        super.start();
+        for (PracticePlayer practicePlayer : getALlMembers()) {
+            practicePlayer.saveOldInventory();
+            practicePlayer.teleportAroundLocation(getArena().getSpawn());
+            practicePlayer.removeAllPotionEffects();
+            practicePlayer.changeName(PracticeTeamManager.getPracticeTeam(practicePlayer).get().getColor() + practicePlayer.getName());
+            practicePlayer.sendMessage(getStartMessage(practicePlayer));
+        }
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void finish() {
+        setWinner(getLivingPracticePlayerNumber(getBlueTeam()) == 0 ? getRedTeam() : getBlueTeam());
+        super.finish();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean mustFinish() {
+        return getLivingPracticePlayerNumber(getRedTeam()) == 0 || getLivingPracticePlayerNumber(getBlueTeam()) == 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Nonnull
+    public BaseComponent @NotNull [] getStartMessage(@Nonnull PracticePlayer practiceReceiver) {
+        Validate.notNull(practiceReceiver, "receiver is null");
+
+        //Creates the start message
         return new ComponentBuilder("Teamfight starting vs ").color(ChatColor.GOLD).bold(true)
-                .append(PracticeTeamManager.getPracticePlayerTeam(receiver).get().getLeader().getName()).color(ChatColor.YELLOW).bold(false)
+                .append(PracticeTeamManager.getPracticeTeam(practiceReceiver).get().getLeader().getName()).color(ChatColor.YELLOW).bold(false)
                 .append("'s team").color(ChatColor.GOLD).bold(true)
                 .append("\nBlue Team: ").color(ChatColor.BLUE).bold(true)
                 .append(getBlueTeam().getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", "))).bold(false)
@@ -82,103 +160,49 @@ public class TeamDuel extends PracticeMatch {
                 .append("minutes").color(ChatColor.GOLD).create();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public BaseComponent[] getEndMessage() {
-        Guards.checkNotNull(getLooser(), "looser is null");
-        Guards.checkNotNull(getWinner(), "winner is null");
+    @Nonnull
+    public BaseComponent[] getFinishMessage() {
+        Validate.notNull(getWinner(), "winner is null");
 
+        //Creates the finish message
         return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
                 .append(getWinner().getName()).color(getWinner().getColor()).bold(false)
                 .append("\nInventories (click to view): ").color(ChatColor.GOLD)
-                .append(getPracticeTeamMembersClickableInventoryAccessAsString(getWinner()))
-                .append(getPracticeTeamMembersClickableInventoryAccessAsString(getLooser()))
+                .append(getWinner().getMembersClickableInventoryAccessAsString())
+                .append(" / ").color(ChatColor.GRAY)
+                .append(Objects.requireNonNull(getLooser()).getMembersClickableInventoryAccessAsString())
                 .append("\nMatch Duration: ").color(ChatColor.GOLD)
                 .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed().toSeconds())).color(ChatColor.YELLOW).create();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public BaseComponent[] getBroadcastMessage() {
-        Guards.checkNotNull(getLooser(), "looser is null");
-        Guards.checkNotNull(getWinner(), "winner is null");
+    @Nonnull
+    public BaseComponent[] getBroadcastFinishMessage() {
+        Validate.notNull(getWinner(), "winner is null");
 
+        //Gets the broadcast finish message
         return new ComponentBuilder("[Teamfight] ").color(ChatColor.GOLD)
-                .append(getLooser().getName()).color(ChatColor.RED)
+                .append(Objects.requireNonNull(getLooser()).getName()).color(ChatColor.RED)
                 .append(" was defeated by ").color(ChatColor.AQUA)
                 .append(getWinner().getName()).color(ChatColor.GREEN).create();
     }
 
-    private BaseComponent[] getPracticeTeamMembersClickableInventoryAccessAsString(PracticeTeam practiceTeam) {
-        ComponentBuilder builder = new ComponentBuilder();
-        for (PracticePlayer practicePlayer : practiceTeam.getMembers()) {
-            builder.append(practicePlayer.getClickableInventoryAccessAsString()).color(practiceTeam.getColor())
-                    .append(", ").color(ChatColor.GRAY);
-        }
-        builder.removeComponent(builder.getCursor());
-        return builder.create();
-    }
-
-    public boolean isBlueTeamMember(@Nonnull PracticePlayer practicePlayer) {
-        Guards.checkNotNull(practicePlayer, "practicePlayer is null");
-        Guards.checkArgument(PracticeTeamManager.hasPracticeTeam(practicePlayer), "practicePlayer doesn't have team");
-
-        return getBlueTeam().getMembers().contains(practicePlayer);
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<PracticePlayer> getALlMembers() {
-        if (isEnded()) return getSpectators();
-        return Stream.of(getBlueTeam().getMembers().stream(), getRedTeam().getMembers().stream(), getSpectators().stream()).flatMap(i -> i).collect(Collectors.toList());
-    }
-
-    private int getLivingPracticePlayerNumber(@Nonnull PracticeTeam practiceTeam) {
-        Guards.checkNotNull(practiceTeam, "practiceTeam is null");
-
-        return practiceTeam.getMembers().stream().filter(member -> !getDeathPracticePlayers().contains(member)).collect(Collectors.toList()).size();
-    }
-
-    @Override
-    public boolean isFinished() {
-        return getLivingPracticePlayerNumber(getRedTeam()) == 0 || getLivingPracticePlayerNumber(getBlueTeam()) == 0;
-    }
-
-    @Override
-    public void start() {
-        for (PracticePlayer practicePlayer : getALlMembers()) {
-            practicePlayer.saveOldInventory();
-
-            practicePlayer.teleportAroundLocation(getArena().getSpawn());
-            practicePlayer.removeAllPotionEffects();
-            practicePlayer.sendMessage(getStartMessage(practicePlayer));
-            practicePlayer.changeName((isBlueTeamMember(practicePlayer) ? ChatColor.BLUE : ChatColor.RED) + practicePlayer.getName());
-        }
-    }
-
-    @Override
-    public void end() {
-        setWinner(getLivingPracticePlayerNumber(getBlueTeam()) == 0 ? getRedTeam() : getBlueTeam());
-        for (PracticePlayer practicePlayer : getALlMembers()) {
-            if (!isDeadFighter(practicePlayer)) {
-                PracticeMatchManager.addOldFighterAsSpectator(practicePlayer);
-            }
-            practicePlayer.removeAllPotionEffects();
-            practicePlayer.sendMessage(getEndMessage());
-        }
-
-        for (Player player : Bukkit.getOnlinePlayers().stream().filter(player -> getALlMembers().contains(PracticePlayerManager.getPracticePlayer(player.getUniqueId()))).collect(Collectors.toList())) {
-            player.sendMessage(getBroadcastMessage());
-        }
-        setEnd();
-    }
-
-    @Override
-    public String getMatchInfo() {
+    @Nonnull
+    public String getMatchInfoAsString() {
         return ChatColor.GOLD + "Teamfight - " + (getWinner() != null ? getWinner().getColor() + "Winner : " + getWinner().getName() :
                 "Remaining player: " + ChatColor.BLUE + getLivingPracticePlayerNumber(getBlueTeam()) + ChatColor.GOLD + " - " +
                         ChatColor.RED + getLivingPracticePlayerNumber(getRedTeam()));
     }
 
-    @Override
-    public List<PracticePlayer> getFighters() {
-        return Stream.concat(getBlueTeam().getMembers().stream(), getRedTeam().getMembers().stream()).collect(Collectors.toList());
-    }
 }

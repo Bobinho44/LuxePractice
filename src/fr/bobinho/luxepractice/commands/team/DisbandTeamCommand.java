@@ -15,29 +15,31 @@ public class DisbandTeamCommand extends BaseCommand {
     /**
      * Command disbandteam
      *
-     * @param sender the sender
+     * @param commandSender the sender
      */
     @Default
     @Syntax("/disbandteam")
     @CommandPermission("luxepractice.disbandteam")
-    public void onDefault(CommandSender sender) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
+    public void onDisbandTeamCommand(CommandSender commandSender) {
+        if (commandSender instanceof Player) {
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender -> {
 
-            if (!PracticeTeamManager.hasPracticeTeam(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You doesn't have a team!");
-                return;
-            }
+                //Checks if the practice player has practice team
+                if (!PracticeTeamManager.hasPracticeTeam(practiceSender)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You doesn't have a team!");
+                    return;
+                }
 
-            if (!PracticeTeamManager.isItPracticeTeamLeader(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You are not the leader of your team!");
-                return;
-            }
+                //Checks if the practice player is a leader of his practice team
+                if (!PracticeTeamManager.isItPracticeTeamLeader(practiceSender)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You are not the leader of your team!");
+                    return;
+                }
 
-            PracticeTeamManager.deletePracticeTeam(practicePlayer);
-            player.sendMessage(ChatColor.GREEN + "You have deleted your team.");
-
+                //Deletes a practice team
+                PracticeTeamManager.deletePracticeTeam(practiceSender);
+                practiceSender.sendMessage(ChatColor.GREEN + "You have deleted your team.");
+            });
         }
     }
 

@@ -3,7 +3,6 @@ package fr.bobinho.luxepractice.commands.kit;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
-import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -15,32 +14,32 @@ public class SaveKitCommand extends BaseCommand {
     /**
      * Command savekit
      *
-     * @param sender  the sender
-     * @param kitName the kit name
+     * @param commandSender the sender
+     * @param kitName       the kit name
      */
     @Default
     @Syntax("/savekit <name>")
     @CommandPermission("luxepractice.savekit")
-    public void onDefault(CommandSender sender, @Single String kitName) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            PracticePlayer practicePlayer = PracticePlayerManager.getPracticePlayer(player.getUniqueId());
+    public void onSaveKitCommand(CommandSender commandSender, @Single String kitName) {
+        if (commandSender instanceof Player) {
+            PracticePlayerManager.getPracticePlayer(((Player) commandSender).getUniqueId()).ifPresent(practiceSender -> {
 
-            //Checks if kit name is already use
-            if (PracticeKitManager.isAlreadyAnUsedPracticeKit(practicePlayer, kitName)) {
-                player.sendMessage(ChatColor.RED + "You already have a kit named " + kitName + "!");
-                return;
-            }
+                //Checks if practice kit name is already use
+                if (PracticeKitManager.isItPracticeKit(practiceSender, kitName)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You already have a kit named " + kitName + "!");
+                    return;
+                }
 
-            //Checks if the player have less than 10 kit
-            if (!PracticeKitManager.haveEmptyPracticeKitSlot(practicePlayer)) {
-                player.sendMessage(ChatColor.RED + "You already have 10 kits!");
-                return;
-            }
+                //Checks if the practice player have less than 10 kit
+                if (!PracticeKitManager.haveEmptyPracticeKitSlot(practiceSender)) {
+                    practiceSender.sendMessage(ChatColor.RED + "You already have 10 kits!");
+                    return;
+                }
 
-            //Creates the kit
-            PracticeKitManager.createPracticeKit(practicePlayer, kitName);
-            player.sendMessage(ChatColor.GREEN + "You have created the kit " + kitName + ".");
+                //Creates the practice kit
+                PracticeKitManager.createPracticeKit(practiceSender, kitName);
+                practiceSender.sendMessage(ChatColor.GREEN + "You have created the kit " + kitName + ".");
+            });
         }
     }
 

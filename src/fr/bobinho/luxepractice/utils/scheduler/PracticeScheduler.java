@@ -1,16 +1,27 @@
 package fr.bobinho.luxepractice.utils.scheduler;
 
 import fr.bobinho.luxepractice.LuxePracticeCore;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class PracticeScheduler {
 
+    /**
+     * Scheduler types
+     */
+    public enum Type {
+        SYNC,
+        ASYNC
+    }
+
+    /**
+     * Fields
+     */
     private final Type type;
     private int delay;
     private TimeUnit delayType;
@@ -21,13 +32,13 @@ public class PracticeScheduler {
     private boolean shouldWait = false;
 
     /**
-     * Creates scheduler.
+     * Creates scheduler
      *
-     * @param type Type.
+     * @param type the type
      */
     public PracticeScheduler(@Nonnull Type type) {
-        //Objects null control
-        Objects.requireNonNull(type, "type cannot be null!");
+        Validate.notNull(type, "type is null");
+
         //Root construction
         this.type = type;
     }
@@ -35,7 +46,7 @@ public class PracticeScheduler {
     /**
      * Creates sync scheduler builder.
      *
-     * @return Appa sync scheduler builder.
+     * @return the sync scheduler builder.
      */
     @Nonnull
     public static PracticeScheduler syncScheduler() {
@@ -43,9 +54,9 @@ public class PracticeScheduler {
     }
 
     /**
-     * Creates async scheduler builder.
+     * Creates async scheduler builder
      *
-     * @return Appa async scheduler builder.
+     * @return the async scheduler builder
      */
     @Nonnull
     public static PracticeScheduler asyncScheduler() {
@@ -53,10 +64,10 @@ public class PracticeScheduler {
     }
 
     /**
-     * Runs scheduler after declared time.
+     * Runs scheduler after declared time
      *
-     * @param delay Scheduler after delay.
-     * @return Appa Scheduler builder.
+     * @param delay the scheduler after delay
+     * @return the scheduler builder
      */
     @Nonnull
     public PracticeScheduler after(int delay) {
@@ -66,25 +77,26 @@ public class PracticeScheduler {
     }
 
     /**
-     * Runs scheduler after declared time.
+     * Runs scheduler after declared time
      *
-     * @param delay     Scheduler after delay.
-     * @param delayType Scheduler after delay type.
-     * @return Appa Scheduler builder.
+     * @param delay     the scheduler after delay
+     * @param delayType the scheduler after delay type
+     * @return the scheduler builder
      */
     @Nonnull
     public PracticeScheduler after(int delay, @Nonnull TimeUnit delayType) {
-        Objects.requireNonNull(delayType, "delay type cannot be null!");
+        Validate.notNull(delayType, "delayType is null");
+
         this.delay = delay;
         this.delayType = delayType;
         return this;
     }
 
     /**
-     * Runs scheduler every declared time.
+     * Runs scheduler every declared time
      *
-     * @param repeatingDelay Scheduler repeating time.
-     * @return Appa Scheduler builder.
+     * @param repeatingDelay the scheduler repeating time
+     * @return the scheduler builder
      */
     @Nonnull
     public PracticeScheduler every(int repeatingDelay) {
@@ -94,24 +106,25 @@ public class PracticeScheduler {
     }
 
     /**
-     * Runs scheduler every declared time.
+     * Runs scheduler every declared time
      *
-     * @param repeatingDelay     Scheduler repeating time.
-     * @param repeatingDelayType Scheduler repeating time type.
-     * @return Appa Scheduler builder.
+     * @param repeatingDelay     the scheduler repeating time
+     * @param repeatingDelayType the scheduler repeating time type
+     * @return the scheduler builder
      */
     @Nonnull
     public PracticeScheduler every(int repeatingDelay, @Nonnull TimeUnit repeatingDelayType) {
-        Objects.requireNonNull(repeatingDelayType, "repeating delay type cannot be null!");
+        Validate.notNull(repeatingDelayType, "repeatingDelayType is null");
+
         this.repeatingDelay = repeatingDelay;
         this.repeatingDelayType = repeatingDelayType;
         return this;
     }
 
     /**
-     * Gets cached runnable.
+     * Gets cached runnable
      *
-     * @return Runnable.
+     * @return the runnable
      */
     public Runnable getCachedRunnable() {
         return cachedRunnable;
@@ -120,59 +133,60 @@ public class PracticeScheduler {
     /**
      * Sets cached runnable
      *
-     * @param cachedRunnable Runnable.
-     * @return Appa scheduler builder.
+     * @param cachedRunnable the runnable
+     * @return the cheduler builder
      */
     @Nonnull
     public PracticeScheduler setCachedRunnable(@Nonnull Runnable cachedRunnable) {
-        Objects.requireNonNull(cachedRunnable, "cached runnable cannot be null!");
+        Validate.notNull(cachedRunnable, "cachedRunnable is null!");
+
         this.cachedRunnable = cachedRunnable;
         return this;
     }
 
     /**
-     * Waits task to complete.
+     * Waits task to complete
      *
-     * @return Appa scheduler builder.
+     * @return the scheduler builder
      */
     @Nonnull
     public PracticeScheduler block() {
-        this.shouldWait = true;
+        shouldWait = true;
         return this;
     }
 
     /**
-     * Runs cached Appa Scheduler.
+     * Runs cached scheduler
      *
-     * @return Bukkit task id.
+     * @return the bukkit task id
      */
     public int runCached() {
-        return this.run(this.cachedRunnable);
+        return run(cachedRunnable);
     }
 
     /**
-     * If there is an ongoing task, it will stop it.
+     * If there is an ongoing task, it will stop it
      */
     public void stop() {
-        if (this.bukkitTaskId == -1)
+        if (bukkitTaskId == -1) {
             return;
-        Bukkit.getScheduler().cancelTask(this.bukkitTaskId);
+        }
+        Bukkit.getScheduler().cancelTask(bukkitTaskId);
     }
 
     /**
-     * Runs configured Appa Scheduler.
+     * Runs configured scheduler
      *
-     * @param runnable Runnable.
-     * @return Bukkit task id.
+     * @param runnable the runnable
+     * @return the bukkit task id.
      */
     public synchronized int run(@Nonnull Runnable runnable) throws IllegalArgumentException {
-        //Objects null check.
-        Objects.requireNonNull(runnable, "runnable cannot be null!");
+        Validate.notNull(runnable, "runnable is null");
 
-        long delay = this.delayType == null ? 0 : Math.max(this.delayType.toMillis(this.delay) / 50, 0);
-        long repeating_delay = this.repeatingDelayType == null ? 0 : Math.max(this.repeatingDelayType.toMillis(this.repeatingDelay) / 50, 0);
+        long delay = delayType == null ? 0 : Math.max(delayType.toMillis(this.delay) / 50, 0);
+        long repeating_delay = repeatingDelayType == null ? 0 : Math.max(repeatingDelayType.toMillis(repeatingDelay) / 50, 0);
 
-        if (this.type == Type.SYNC) {
+        if (type == Type.SYNC) {
             if (repeating_delay != 0)
                 bukkitTaskId = Bukkit.getScheduler().runTaskTimer(LuxePracticeCore.getInstance(), runnable, delay, repeating_delay).getTaskId();
             else if (delay != 0)
@@ -188,8 +202,8 @@ public class PracticeScheduler {
                 bukkitTaskId = Bukkit.getScheduler().runTaskAsynchronously(LuxePracticeCore.getInstance(), runnable).getTaskId();
         }
 
-        //Waits task to complete.
-        if (this.shouldWait) {
+        //Waits task to complete
+        if (shouldWait) {
             while (true) {
                 if (Bukkit.getScheduler().isCurrentlyRunning(bukkitTaskId) || Bukkit.getScheduler().isQueued(bukkitTaskId))
                     continue;
@@ -201,18 +215,17 @@ public class PracticeScheduler {
     }
 
     /**
-     * Runs configured Appa Scheduler.
+     * Runs configured scheduler
      *
-     * @param task Bukkit task.
+     * @param task the bukkit task
      */
     public synchronized void run(@Nonnull Consumer<BukkitTask> task) throws IllegalArgumentException {
-        //Objects null check.
-        Objects.requireNonNull(task, "task cannot be null!");
+        Validate.notNull(task, "task is null");
 
-        long delay = this.delayType == null ? 0 : Math.max(this.delayType.toMillis(this.delay) / 50, 0);
-        long repeating_delay = this.repeatingDelayType == null ? 0 : Math.max(this.repeatingDelayType.toMillis(this.repeatingDelay) / 50, 0);
+        long delay = delayType == null ? 0 : Math.max(delayType.toMillis(this.delay) / 50, 0);
+        long repeating_delay = repeatingDelayType == null ? 0 : Math.max(repeatingDelayType.toMillis(this.repeatingDelay) / 50, 0);
 
-        if (this.type == Type.SYNC) {
+        if (type == Type.SYNC) {
             if (repeating_delay != 0)
                 Bukkit.getScheduler().runTaskTimer(LuxePracticeCore.getInstance(), task, delay, repeating_delay);
             else if (delay != 0)
@@ -229,11 +242,4 @@ public class PracticeScheduler {
         }
     }
 
-    /**
-     * Scheduler types.
-     */
-    public enum Type {
-        SYNC,
-        ASYNC
-    }
 }
