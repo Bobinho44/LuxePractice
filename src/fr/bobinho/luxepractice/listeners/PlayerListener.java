@@ -7,12 +7,16 @@ import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
+import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+
+import java.util.concurrent.TimeUnit;
 
 public class PlayerListener implements Listener {
 
@@ -41,7 +45,7 @@ public class PlayerListener implements Listener {
         PracticePlayerManager.getPracticePlayer(e.getPlayer().getUniqueId()).ifPresent(practicePlayer -> {
 
             //Checks if the practice player is a leader of a practice team
-            if (PracticeTeamManager.isItPracticeTeamLeader(practicePlayer)) {
+            if (PracticeTeamManager.hasPracticeTeam(practicePlayer) && PracticeTeamManager.isItPracticeTeamLeader(practicePlayer)) {
                 PracticeTeamManager.deletePracticeTeam(practicePlayer);
             }
 
@@ -75,23 +79,25 @@ public class PlayerListener implements Listener {
      */
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        PracticePlayerManager.getPracticePlayer(e.getPlayer().getUniqueId()).ifPresent(practicePlayer -> {
+        PracticeScheduler.syncScheduler().after(50, TimeUnit.MILLISECONDS).run(() ->
+                PracticePlayerManager.getPracticePlayer(e.getPlayer().getUniqueId()).ifPresent(practicePlayer -> {
 
-            if (PracticeMatchManager.isInMatch(practicePlayer)) {
-                PracticeMatchManager.addSpectator(practicePlayer, practicePlayer);
-                return;
-            }
+                    if (PracticeMatchManager.isInMatch(practicePlayer)) {
+                        PracticeMatchManager.addSpectator(practicePlayer, practicePlayer);
+                        return;
+                    }
 
-            //Checks if the player has enabled an auto kit
-            if (PracticeKitManager.haveAutoPracticeKit(practicePlayer)) {
+                    //Checks if the player has enabled an auto kit
+                    if (PracticeKitManager.haveAutoPracticeKit(practicePlayer)) {
 
-                //Gives the auto kit
-                PracticeKitManager.givePracticeKit(practicePlayer, practicePlayer.getAutoKit().get().getName());
-            }
+                        //Gives the auto kit
+                        PracticeKitManager.givePracticeKit(practicePlayer, practicePlayer.getAutoKit().get().getName());
+                    }
 
-            //Teleport the practice player to the spawn
-            practicePlayer.teleportToTheSpawn();
-        });
+                    //Teleport the practice player to the spawn
+                    practicePlayer.teleportToTheSpawn(practicePlayer.getSpigotPlayer().getWorld().getName());
+                })
+        );
     }
 
     /**
@@ -106,6 +112,19 @@ public class PlayerListener implements Listener {
             //Increases deaths and kills values
             PracticePlayerManager.getPracticePlayer(e.getEntity().getUniqueId()).ifPresent(PracticePlayer::addDeath);
             PracticePlayerManager.getPracticePlayer(e.getEntity().getKiller().getUniqueId()).ifPresent(PracticePlayer::addKill);
+        }
+    }
+
+    /**
+     * Listen when a player change of world
+     *
+     * @param e the player teleport event
+     */
+    @EventHandler
+    public void onWorldChange(PlayerTeleportEvent e) {
+        if (e.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL|| e.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
+            e.setCancelled(true);
+            PracticePlayerManager.getPracticePlayer(e.getPlayer().getUniqueId()).ifPresent(practicePlayer -> practicePlayer.teleportToTheSpawn(e.getTo().getWorld().getName()));
         }
     }
 

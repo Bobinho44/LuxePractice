@@ -3,7 +3,6 @@ package fr.bobinho.luxepractice.utils.arena.request;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
 import org.apache.commons.lang.Validate;
-import org.atlanmod.commons.Guards;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class PracticeDuelRequestManager {
     public static void sendPracticeDuelRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
         Validate.notNull(practiceSender, "practiceSender is null");
         Validate.notNull(practiceReceiver, "practiceReceiver is null");
-        Guards.checkArgument(!isItPracticeDuelRequest(practiceSender, practiceReceiver), "this request has already been sent");
+        Validate.isTrue(!isItPracticeDuelRequest(practiceSender, practiceReceiver), "this request has already been sent");
 
         //Creates the practice duel request
         getPracticeDuelRequests().add(new PracticeRequest(practiceSender, practiceReceiver));
@@ -92,7 +91,7 @@ public class PracticeDuelRequestManager {
     public static void removePracticeDuelRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
         Validate.notNull(practiceSender, "practiceSender is null");
         Validate.notNull(practiceReceiver, "practiceReceiver is null");
-        Guards.checkArgument(isItPracticeDuelRequest(practiceSender, practiceReceiver), "this request doesn't exist");
+        Validate.isTrue(isItPracticeDuelRequest(practiceSender, practiceReceiver), "this request doesn't exist");
 
         //Removes the practice duel request
         getPracticeDuelRequests().remove(getPracticeDuelRequest(practiceSender, practiceReceiver).get());

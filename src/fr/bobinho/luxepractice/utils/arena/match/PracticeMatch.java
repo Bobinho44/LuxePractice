@@ -1,12 +1,12 @@
 package fr.bobinho.luxepractice.utils.arena.match;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import fr.bobinho.luxepractice.utils.arena.PracticeArena;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.apache.commons.lang.Validate;
-import org.atlanmod.commons.time.Stopwatch;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -127,7 +127,7 @@ public abstract class PracticeMatch {
     public void addFighter(@Nonnull PracticePlayer practicePlayer) {
         Validate.notNull(practicePlayer, "practicePlayer is null");
 
-        getSpectators().add(practicePlayer);
+        getFighters().add(practicePlayer);
     }
 
     /**
@@ -141,19 +141,6 @@ public abstract class PracticeMatch {
     }
 
     /**
-     * Checks if the practice player is a practice match dead fighters
-     *
-     * @param practicePlayer the practice player
-     * @return if he is a practice match dead fighters
-     */
-    public boolean isItDeadFighter(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
-
-        return getFighters().contains(practicePlayer);
-    }
-
-    /**
      * Adds a new practice player to the practice match dead fighters
      *
      * @param practicePlayer the practice player
@@ -161,7 +148,7 @@ public abstract class PracticeMatch {
     public void addDeadFighter(@Nonnull PracticePlayer practicePlayer) {
         Validate.notNull(practicePlayer, "practicePlayer is null");
 
-        getSpectators().add(practicePlayer);
+        getDeadFighters().add(practicePlayer);
     }
 
     /**

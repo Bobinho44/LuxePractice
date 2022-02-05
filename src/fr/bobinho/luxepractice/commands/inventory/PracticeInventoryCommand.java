@@ -9,6 +9,7 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import fr.bobinho.luxepractice.utils.arena.inventory.PracticeInventoryHolder;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -27,9 +28,14 @@ public class PracticeInventoryCommand extends BaseCommand {
      */
     @Default
     @CommandPermission("luxepractice.practiceinventory")
-    public void onPracticeInventoryCommand(CommandSender commandSender, @Single OnlinePlayer streamer) {
+    public void onPracticeInventoryCommand(CommandSender commandSender, @Single String key, @Single OnlinePlayer streamer) {
         if (commandSender instanceof Player) {
             Player player = (Player) commandSender;
+
+            if (!key.equals("Mm7kTCD2")) {
+                player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                return;
+            }
 
             //Checks if the uuid is valid
             if (streamer != null) {

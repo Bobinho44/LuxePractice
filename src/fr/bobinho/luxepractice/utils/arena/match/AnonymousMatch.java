@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class AnonymousMatch extends PracticeMatch {
 
@@ -118,7 +119,12 @@ public class AnonymousMatch extends PracticeMatch {
         super.start();
         for (PracticePlayer practicePlayer : getALlMembers()) {
             practicePlayer.saveOldInventory();
-            practicePlayer.teleportAroundLocation(getArena().getSpawn());
+            if (getFighter1().equals(practicePlayer)) {
+                practicePlayer.teleportAroundLocation(getArena().getSpawn1());
+            }
+            else {
+                practicePlayer.teleportAroundLocation(getArena().getSpawn2());
+            }
             practicePlayer.removeAllPotionEffects();
             PracticeKitManager.givePracticeKit(practicePlayer, getKit());
             practicePlayer.sendMessage(getStartMessage(practicePlayer));
@@ -139,7 +145,7 @@ public class AnonymousMatch extends PracticeMatch {
      */
     @Override
     public boolean mustFinish() {
-        return getDeadFighters().size() > 0;
+        return !isFinished() && getDeadFighters().size() > 0;
     }
 
     /**
@@ -175,7 +181,7 @@ public class AnonymousMatch extends PracticeMatch {
                 .append(", ").color(ChatColor.GRAY)
                 .append(Objects.requireNonNull(getLooser()).getClickableInventoryAccessAsString()).color(ChatColor.RED)
                 .append("\nMatch Duration: ").color(ChatColor.GOLD)
-                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed().toSeconds())).color(ChatColor.YELLOW).create();
+                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed(TimeUnit.SECONDS))).color(ChatColor.YELLOW).create();
     }
 
     /**

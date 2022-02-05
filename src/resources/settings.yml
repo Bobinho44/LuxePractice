@@ -1,3 +1,6 @@
-spawn: "world:0:0:0:0:0"
+spawn:
+  world: "world:0:100:0:0:0"
+  nether: "world_nether:0:100:0:0:0"
+  end: "world_the_end:0:100:0:0:0"
 cooldown:
   ENDER_PEARL: 10

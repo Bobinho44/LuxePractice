@@ -3,7 +3,6 @@ package fr.bobinho.luxepractice.listeners;
 import fr.bobinho.luxepractice.utils.arena.inventory.PracticeInventoryHolder;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatch;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
-import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,8 +15,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class ArenaListener implements Listener {
@@ -70,7 +67,7 @@ public class ArenaListener implements Listener {
 
                     //Views the practice fighter inventory
                     if (e.getCurrentItem() != null && e.getCurrentItem().getType() == Material.PLAYER_HEAD) {
-                        Bukkit.dispatchCommand(practicePlayer.getSpigotPlayer(), "practiceinventory " + ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()));
+                        Bukkit.dispatchCommand(practicePlayer.getSpigotPlayer(), "practiceinventory Mm7kTCD2 " + ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()));
                     }
                 }
             });
@@ -119,18 +116,6 @@ public class ArenaListener implements Listener {
                             }
                         }
                     }));
-        }
-    }
-
-    /**
-     * Listens when a practice player open his spectator inventory
-     *
-     * @param e the inventory open event
-     */
-    @EventHandler
-    public void onOpenInventory(InventoryOpenEvent e) {
-        if (e.getInventory().getType() == InventoryType.PLAYER && !(e.getInventory() instanceof PracticeInventoryHolder)) {
-            PracticeKitManager.giveSpectatorPracticeKit(PracticePlayerManager.getPracticePlayer(e.getPlayer().getUniqueId()).get());
         }
     }
 

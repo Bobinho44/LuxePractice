@@ -55,14 +55,16 @@ public class PracticeArenaManager {
     /**
      * Creates a new practice arena
      *
-     * @param arenaSpawn the practice arena spawn
+     * @param arenaSpawn1 the practice arena spawn1
+     * @param arenaSpawn2 the practice arena spawn2
      * @param arenaName  the practice arena name
      */
-    public static void createPracticeArena(@Nonnull Location arenaSpawn, @Nonnull String arenaName) {
-        Validate.notNull(arenaSpawn, "arenaSpawn is null");
+    public static void createPracticeArena(@Nonnull Location arenaSpawn1, @Nonnull Location arenaSpawn2, @Nonnull String arenaName) {
+        Validate.notNull(arenaSpawn1, "arenaSpawn1 is null");
+        Validate.notNull(arenaSpawn2, "arenaSpawn2 is null");
         Validate.notNull(arenaName, "arenaName is null");
 
-        getPracticeArenas().add(new PracticeArena(arenaSpawn, arenaName));
+        getPracticeArenas().add(new PracticeArena(arenaSpawn1, arenaSpawn2, arenaName));
     }
 
     public static void deletePracticeArena(@Nonnull String arenaName) {
@@ -99,8 +101,12 @@ public class PracticeArenaManager {
         //Loads the practice arenas
         for (String arenaName : configuration.getKeys(false)) {
 
+            //Gets practice arena spawns
+            Location arenaSpawn1 = PracticeLocationUtil.getAsLocation(configuration.getString(arenaName + ".spawn1", "world:0:100:0:0:0"));
+            Location arenaSpawn2 = PracticeLocationUtil.getAsLocation(configuration.getString(arenaName + ".spawn2", "world:0:100:0:0:0"));
+
             //Creates the practice arena
-            createPracticeArena(PracticeLocationUtil.getAsLocation(configuration.getString(arenaName + ".spawn", "world:0:0:0:0:0")), arenaName);
+            createPracticeArena(arenaSpawn1, arenaSpawn2, arenaName);
         }
     }
 
@@ -113,7 +119,8 @@ public class PracticeArenaManager {
 
         //Saves the practice arenas
         for (PracticeArena arena : getPracticeArenas()) {
-            configuration.set(arena.getName() + ".spawn", PracticeLocationUtil.getAsString(arena.getSpawn()));
+            configuration.set(arena.getName() + ".spawn1", PracticeLocationUtil.getAsString(arena.getSpawn1()));
+            configuration.set(arena.getName() + ".spawn2", PracticeLocationUtil.getAsString(arena.getSpawn2()));
         }
 
         LuxePracticeCore.getArenasSettings().save();

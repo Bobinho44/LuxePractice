@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -115,7 +116,12 @@ public class TeamDuel extends PracticeMatch {
         super.start();
         for (PracticePlayer practicePlayer : getALlMembers()) {
             practicePlayer.saveOldInventory();
-            practicePlayer.teleportAroundLocation(getArena().getSpawn());
+            if (getBlueTeam().getMembers().contains(practicePlayer)) {
+                practicePlayer.teleportAroundLocation(getArena().getSpawn1());
+            }
+            else {
+                practicePlayer.teleportAroundLocation(getArena().getSpawn2());
+            }
             practicePlayer.removeAllPotionEffects();
             practicePlayer.changeName(PracticeTeamManager.getPracticeTeam(practicePlayer).get().getColor() + practicePlayer.getName());
             practicePlayer.sendMessage(getStartMessage(practicePlayer));
@@ -136,7 +142,7 @@ public class TeamDuel extends PracticeMatch {
      */
     @Override
     public boolean mustFinish() {
-        return getLivingPracticePlayerNumber(getRedTeam()) == 0 || getLivingPracticePlayerNumber(getBlueTeam()) == 0;
+        return !isFinished() && (getLivingPracticePlayerNumber(getRedTeam()) == 0 || getLivingPracticePlayerNumber(getBlueTeam()) == 0);
     }
 
     /**
@@ -176,7 +182,7 @@ public class TeamDuel extends PracticeMatch {
                 .append(" / ").color(ChatColor.GRAY)
                 .append(Objects.requireNonNull(getLooser()).getMembersClickableInventoryAccessAsString())
                 .append("\nMatch Duration: ").color(ChatColor.GOLD)
-                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed().toSeconds())).color(ChatColor.YELLOW).create();
+                .append(PracticeDurationFormat.getAsMinuteSecondFormat(getDuration().elapsed(TimeUnit.SECONDS))).color(ChatColor.YELLOW).create();
     }
 
     /**

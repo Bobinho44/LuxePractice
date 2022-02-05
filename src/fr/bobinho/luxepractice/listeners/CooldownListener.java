@@ -13,7 +13,7 @@ public class CooldownListener implements Listener {
 
         //Checks if a practice player use an ender pearl
         if (e.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL) {
-            e.getPlayer().setCooldown(Material.ENDER_PEARL, 20 * LuxePracticeCore.getMainSettings().getConfiguration().getInt("ENDER_PEARL"));
+            e.getPlayer().setCooldown(Material.ENDER_PEARL, 20 * LuxePracticeCore.getMainSettings().getConfiguration().getInt("cooldown.ENDER_PEARL"));
         }
     }
 

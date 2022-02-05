@@ -16,7 +16,6 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -121,6 +120,7 @@ public class PracticeMatchManager {
 
     /**
      * Creates a new practice team fight match
+     *
      * @param leaderMatchTeam1 the practice team 1 leader
      * @param leaderMatchTeam2 the practice team 2 leader
      */
@@ -176,11 +176,12 @@ public class PracticeMatchManager {
         }
 
         //Adds all practice spectators attributes
-        PracticeKitManager.giveSpectatorPracticeKit(practiceViewer);
-        practiceViewer.changeName(practiceViewer.getName());
         practiceMatch.addSpectator(practiceViewer);
+        practiceViewer.changeName(practiceViewer.getName());
         practiceViewer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999999, 1));
         practiceViewer.setAllowFlight(true);
+        PracticeKitManager.giveSpectatorPracticeKit(practiceViewer);
+        practiceViewer.teleportAroundLocation(practiceMatch.getArena().getSpawn1());
 
         //Checks if the match must be finished
         if (practiceMatch.mustFinish()) {
@@ -200,10 +201,11 @@ public class PracticeMatchManager {
         PracticeMatch practiceMatch = getPracticeMatch(practiceViewer).get();
 
         //Removes all practice spectators attributes
-        PracticeKitManager.givePracticeKit(practiceViewer, new PracticeKit("inventory", practiceViewer.getOldInventory()));
         practiceMatch.removeSpectator(practiceViewer);
         practiceViewer.removeAllPotionEffects();
         practiceViewer.setAllowFlight(false);
+        PracticeKitManager.givePracticeKit(practiceViewer, new PracticeKit("inventory", practiceViewer.getOldInventory()));
+        practiceViewer.teleportToTheSpawn();
 
         //Checks if all practice match members are gone
         if (practiceMatch.isFinished() && practiceMatch.getSpectators().size() == 0) {

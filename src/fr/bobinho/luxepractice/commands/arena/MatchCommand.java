@@ -2,16 +2,11 @@ package fr.bobinho.luxepractice.commands.arena;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import fr.bobinho.luxepractice.utils.arena.PracticeArena;
 import fr.bobinho.luxepractice.utils.arena.PracticeArenaManager;
-import fr.bobinho.luxepractice.utils.arena.request.PracticeWaitListManager;
-import fr.bobinho.luxepractice.utils.arena.match.AnonymousMatch;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
-import fr.bobinho.luxepractice.utils.kit.PracticeKit;
+import fr.bobinho.luxepractice.utils.arena.request.PracticeWaitListManager;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
-import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,8 +22,14 @@ public class MatchCommand extends BaseCommand {
     @Default
     @Syntax("/match <kit>")
     @CommandPermission("luxepractice.match")
-    public void onDefault(CommandSender commandSender, @Optional String name) {
+    public void onMatchCommand(CommandSender commandSender, @Optional String name) {
         if (commandSender instanceof Player) {
+
+            //Checks if there is a basic practice kit
+            if (PracticeKitManager.getDefaultBasicPracticeKit().isEmpty()) {
+                ((Player) commandSender).sendMessage(ChatColor.RED + "There is no default kit!");
+                return;
+            }
 
             final String kitName = name != null ? name : PracticeKitManager.getDefaultBasicPracticeKit().get().getName();
 

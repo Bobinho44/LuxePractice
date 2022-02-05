@@ -264,15 +264,6 @@ public class PracticePlayer {
     }
 
     /**
-     * Gets the practice player location
-     * @return the practice player location
-     */
-    @Nonnull
-    public Location getLocation() {
-        return getSpigotPlayer().getLocation().clone();
-    }
-
-    /**
      * Teleports the practice player in a radius of 10 blocks around the location
      *
      * @param location the location
@@ -286,16 +277,24 @@ public class PracticePlayer {
     }
 
     /**
-     * Teleports the practice player to the spawn
+     * Teleports the practice player to a world spawn
      */
-    public void teleportToTheSpawn() {
+    public void teleportToTheSpawn(@Nonnull String worldType) {
+        Validate.notNull(worldType, "worldType is null");
 
         //Gets and teleports the player to the spawn
-        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn", "world:0:0:0:0:0"));
+        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, "world:0:100:0:0:0"));
         getSpigotPlayer().teleport(spawn);
 
         //Sends the message
         sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
+    }
+
+    /**
+     * Teleports the practice player to his world spawn
+     */
+    public void teleportToTheSpawn() {
+        teleportToTheSpawn(getSpigotPlayer().getWorld().getName());
     }
 
     /**
@@ -353,7 +352,7 @@ public class PracticePlayer {
     @Nonnull
     public TextComponent getClickableInventoryAccessAsString() {
         TextComponent clickableInventoryAccess = new TextComponent(getName());
-        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory " + getName()));
+        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory Mm7kTCD2 " + getName()));
         return clickableInventoryAccess;
     }
 

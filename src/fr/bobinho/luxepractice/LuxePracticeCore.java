@@ -34,6 +34,7 @@ public class LuxePracticeCore extends JavaPlugin {
 
     /**
      * Gets the luxe practice core instance
+     *
      * @return the luxe practice core instance
      */
     @Nonnull
@@ -43,6 +44,7 @@ public class LuxePracticeCore extends JavaPlugin {
 
     /**
      * Gets the arenas settings
+     *
      * @return the arenas settings
      */
     @Nonnull
@@ -52,6 +54,7 @@ public class LuxePracticeCore extends JavaPlugin {
 
     /**
      * Gets the players settings
+     *
      * @return the players settings
      */
     @Nonnull
@@ -61,6 +64,7 @@ public class LuxePracticeCore extends JavaPlugin {
 
     /**
      * Gets the main settings
+     *
      * @return the main settings
      */
     @Nonnull

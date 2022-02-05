@@ -40,7 +40,7 @@ public class TeamCommand extends BaseCommand {
                 //Gets practice team's members information
                 StringBuilder practiceTeamMembers = new StringBuilder(ChatColor.GOLD + practiceTeam.getLeader().getName() + " team's members: ");
                 for (PracticePlayer practiceMember : practiceTeam.getMembers()) {
-                    practiceTeamMembers.append(ChatColor.GOLD + "- " + ChatColor.YELLOW + practiceMember.getName());
+                    practiceTeamMembers.append(ChatColor.GOLD + "\n- " + ChatColor.YELLOW + practiceMember.getName());
                 }
 
                 //Sends message
