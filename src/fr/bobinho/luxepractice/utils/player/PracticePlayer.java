@@ -1,6 +1,7 @@
 package fr.bobinho.luxepractice.utils.player;
 
-import com.mojang.authlib.GameProfile;
+import com.nametagedit.plugin.NametagEdit;
+import com.nametagedit.plugin.api.data.Nametag;
 import fr.bobinho.luxepractice.LuxePracticeCore;
 import fr.bobinho.luxepractice.utils.format.PracticeNumberFormat;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
@@ -9,12 +10,10 @@ import fr.bobinho.luxepractice.utils.location.PracticeLocationUtil;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_16_R3.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -22,7 +21,6 @@ import org.bukkit.potion.PotionEffect;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +36,7 @@ public class PracticePlayer {
     private final List<PracticeKit> kits = new ArrayList<>();
     private PracticeKit autoKit;
     private ItemStack[] oldInventory = new ItemStack[41];
+    private String[] nametag = new String[2];
 
     /**
      * Creates a new practice player
@@ -231,6 +230,23 @@ public class PracticePlayer {
     }
 
     /**
+     * Gets the practice player nametag
+     * @return the practice player nametag
+     */
+    @Nullable
+    public String[] getNametag() {
+        return nametag;
+    }
+
+    /**
+     * Sets the practice player nametag
+     * @param nametag the practice player nametag
+     */
+    public void setNametag(String[] nametag) {
+        this.nametag = nametag;
+    }
+
+    /**
      * Gets the item from slot "slot" of the practice player inventory
      *
      * @param slot the inventory slot
@@ -283,8 +299,8 @@ public class PracticePlayer {
         Validate.notNull(worldType, "worldType is null");
 
         //Gets and teleports the player to the spawn
-        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, "world:0:100:0:0:0"));
-        getSpigotPlayer().teleport(spawn);
+        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, worldType + ":0:100:0:0:0"));
+        getSpigotPlayer().teleport(spawn.toHighestLocation());
 
         //Sends the message
         sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
@@ -299,6 +315,7 @@ public class PracticePlayer {
 
     /**
      * Gets the practice player health information
+     *
      * @return the practice player health information
      */
     @Nonnull
@@ -308,6 +325,7 @@ public class PracticePlayer {
 
     /**
      * Gets the practice player active potion effects information
+     *
      * @return the practice player active potion effects information
      */
     public List<String> getActivePotionEffectsInformation() {
@@ -386,36 +404,16 @@ public class PracticePlayer {
     /**
      * Sets the practice player name tag
      *
-     * @param name the practice player name
+     * @param color the practice team color
      */
-    public void changeName(@Nonnull String name) {
-        Validate.notNull(name, "name is null");
-
-        EntityPlayer viewer = ((CraftPlayer) getSpigotPlayer()).getHandle();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-
-            if (player != getSpigotPlayer()) {
-
-                PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
-
-                //Removes the practice player
-                connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, viewer));
-
-                //Sets the practice player name
-                GameProfile gp = ((CraftPlayer) getSpigotPlayer()).getProfile();
-                try {
-                    Field nameField = GameProfile.class.getDeclaredField("name");
-                    nameField.setAccessible(true);
-                    nameField.set(gp, name);
-                } catch (IllegalAccessException | NoSuchFieldException e) {
-                    e.printStackTrace();
-                }
-
-                //Adds the practice player
-                connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, viewer));
-                connection.sendPacket(new PacketPlayOutEntityDestroy(getSpigotPlayer().getEntityId()));
-                connection.sendPacket(new PacketPlayOutNamedEntitySpawn(viewer));
-            }
+    public void changeName(@Nullable ChatColor color) {
+        if (color == null) {
+            NametagEdit.getApi().setNametag(getSpigotPlayer(), Objects.requireNonNull(getNametag())[0], getNametag()[1]);
+        }
+        else {
+            Nametag nametag = NametagEdit.getApi().getNametag(getSpigotPlayer());
+            setNametag(new String[]{nametag.getPrefix(), nametag.getSuffix()});
+            NametagEdit.getApi().setNametag(getSpigotPlayer(), color + "", "");
         }
     }
 

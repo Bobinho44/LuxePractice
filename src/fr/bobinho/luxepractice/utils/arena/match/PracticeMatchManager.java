@@ -166,7 +166,7 @@ public class PracticeMatchManager {
         PracticeMatch practiceMatch = getPracticeMatch(practiceStreamer).get();
 
         //Saves inventory of practice spectators (not old practice fighters)
-        if (!practiceMatch.isItFighter(practiceViewer)) {
+        if (!PracticeMatchManager.isInMatch(practiceViewer)) {
             practiceViewer.saveOldInventory();
         }
 
@@ -177,7 +177,7 @@ public class PracticeMatchManager {
 
         //Adds all practice spectators attributes
         practiceMatch.addSpectator(practiceViewer);
-        practiceViewer.changeName(practiceViewer.getName());
+        practiceViewer.changeName(null);
         practiceViewer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999999, 1));
         practiceViewer.setAllowFlight(true);
         PracticeKitManager.giveSpectatorPracticeKit(practiceViewer);

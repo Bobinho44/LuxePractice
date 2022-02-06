@@ -140,6 +140,7 @@ public class LuxePracticeCore extends JavaPlugin {
         commandManager.registerCommand(new AutoKitCommand());
         commandManager.registerCommand(new SetKitCommand());
         commandManager.registerCommand(new UnsetKitCommand());
+        commandManager.registerCommand(new ListKitCommand());
 
         //Register see inventory's command
         commandManager.registerCommand(new PracticeInventoryCommand());

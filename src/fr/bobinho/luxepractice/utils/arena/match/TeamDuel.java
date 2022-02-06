@@ -123,7 +123,7 @@ public class TeamDuel extends PracticeMatch {
                 practicePlayer.teleportAroundLocation(getArena().getSpawn2());
             }
             practicePlayer.removeAllPotionEffects();
-            practicePlayer.changeName(PracticeTeamManager.getPracticeTeam(practicePlayer).get().getColor() + practicePlayer.getName());
+            practicePlayer.changeName(PracticeTeamManager.getPracticeTeam(practicePlayer).get().getColor());
             practicePlayer.sendMessage(getStartMessage(practicePlayer));
         }
     }
