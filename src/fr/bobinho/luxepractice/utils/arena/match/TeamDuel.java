@@ -117,10 +117,10 @@ public class TeamDuel extends PracticeMatch {
         for (PracticePlayer practicePlayer : getALlMembers()) {
             practicePlayer.saveOldInventory();
             if (getBlueTeam().getMembers().contains(practicePlayer)) {
-                practicePlayer.teleportAroundLocation(getArena().getSpawn1());
+                practicePlayer.teleport(getArena().getSpawn1());
             }
             else {
-                practicePlayer.teleportAroundLocation(getArena().getSpawn2());
+                practicePlayer.teleport(getArena().getSpawn2());
             }
             practicePlayer.removeAllPotionEffects();
             practicePlayer.changeName(PracticeTeamManager.getPracticeTeam(practicePlayer).get().getColor());

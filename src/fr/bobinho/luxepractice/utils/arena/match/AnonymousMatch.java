@@ -120,10 +120,10 @@ public class AnonymousMatch extends PracticeMatch {
         for (PracticePlayer practicePlayer : getALlMembers()) {
             practicePlayer.saveOldInventory();
             if (getFighter1().equals(practicePlayer)) {
-                practicePlayer.teleportAroundLocation(getArena().getSpawn1());
+                practicePlayer.teleport(getArena().getSpawn1());
             }
             else {
-                practicePlayer.teleportAroundLocation(getArena().getSpawn2());
+                practicePlayer.teleport(getArena().getSpawn2());
             }
             practicePlayer.removeAllPotionEffects();
             PracticeKitManager.givePracticeKit(practicePlayer, getKit());

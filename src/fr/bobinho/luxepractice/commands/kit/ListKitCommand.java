@@ -5,10 +5,7 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Syntax;
-import fr.bobinho.luxepractice.utils.arena.team.PracticeTeam;
-import fr.bobinho.luxepractice.utils.arena.team.PracticeTeamManager;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
-import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -31,14 +28,14 @@ public class ListKitCommand extends BaseCommand {
 
                 //Checks if the practice player has practice team
                 if (practiceSender.getKits().size() == 0) {
-                    practiceSender.sendMessage(ChatColor.RED + "You doesn't have a kit!");
+                    practiceSender.sendMessage(ChatColor.RED + "You have no saved kits!");
                     return;
                 }
 
                 //Gets practice team's members information
                 StringBuilder practiceSendersKits = new StringBuilder(ChatColor.GOLD + practiceSender.getName() + "'s kits: ");
                 for (PracticeKit practiceKit : practiceSender.getKits()) {
-                    practiceSendersKits.append(ChatColor.GOLD + "\n- " + ChatColor.YELLOW + practiceKit.getName());
+                    practiceSendersKits.append(ChatColor.GOLD).append("\n- ").append(ChatColor.YELLOW).append(practiceKit.getName());
                 }
 
                 //Sends message

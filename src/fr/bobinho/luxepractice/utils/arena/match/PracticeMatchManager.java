@@ -181,7 +181,7 @@ public class PracticeMatchManager {
         practiceViewer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999999, 1));
         practiceViewer.setAllowFlight(true);
         PracticeKitManager.giveSpectatorPracticeKit(practiceViewer);
-        practiceViewer.teleportAroundLocation(practiceMatch.getArena().getSpawn1());
+        practiceViewer.teleport(practiceMatch.getArena().getSpawn1());
 
         //Checks if the match must be finished
         if (practiceMatch.mustFinish()) {

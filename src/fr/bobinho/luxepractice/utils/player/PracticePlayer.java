@@ -284,12 +284,11 @@ public class PracticePlayer {
      *
      * @param location the location
      */
-    public void teleportAroundLocation(@Nonnull Location location) {
+    public void teleport(@Nonnull Location location) {
         Validate.notNull(location, "location is null");
 
-        //Teleports the player around the location (radius of 10 blocks)
-        Random random = new Random();
-        getSpigotPlayer().teleport(location.clone().add(random.nextInt(10), 0, random.nextInt(10)).toHighestLocation().add(0, 1, 0));
+        //Teleports the player to the location
+        getSpigotPlayer().teleport(location);
     }
 
     /**
@@ -299,18 +298,21 @@ public class PracticePlayer {
         Validate.notNull(worldType, "worldType is null");
 
         //Gets and teleports the player to the spawn
-        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, worldType + ":0:100:0:0:0"));
-        getSpigotPlayer().teleport(spawn.toHighestLocation());
+        Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, worldType + ":0:1000:0:0:0"));
+        if (spawn.getY() >= 1000) {
+            spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn.getBlockX(), spawn.getBlockZ()) + 1);
+        }
+        getSpigotPlayer().teleport(spawn);
 
         //Sends the message
         sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
     }
 
     /**
-     * Teleports the practice player to his world spawn
+     * Teleports the practice player to the overworld spawn
      */
     public void teleportToTheSpawn() {
-        teleportToTheSpawn(getSpigotPlayer().getWorld().getName());
+        teleportToTheSpawn("world");
     }
 
     /**
