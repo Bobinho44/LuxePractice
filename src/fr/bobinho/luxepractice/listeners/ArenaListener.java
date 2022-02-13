@@ -1,5 +1,6 @@
 package fr.bobinho.luxepractice.listeners;
 
+import fr.bobinho.luxepractice.utils.arena.PracticeArena;
 import fr.bobinho.luxepractice.utils.arena.inventory.PracticeInventoryHolder;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatch;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
@@ -12,10 +13,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import java.util.UUID;
 
 public class ArenaListener implements Listener {
 
@@ -34,24 +37,6 @@ public class ArenaListener implements Listener {
     }
 
     /**
-     * Listens when a practice player die during a practice match
-     *
-     * @param e the player death event
-     */
-    @EventHandler
-    public void onDeath(PlayerDeathEvent e) {
-        PracticePlayerManager.getPracticePlayer(e.getEntity().getUniqueId()).ifPresent(practicePlayer -> {
-
-            //Checks if the player is in a match
-            if (PracticeMatchManager.isInMatch(practicePlayer)) {
-
-                //Adds the player to the death list and check if the match is finished
-                PracticeMatchManager.addSpectator(practicePlayer, practicePlayer);
-            }
-        });
-    }
-
-    /**
      * Listens when a practice spectator interact with his inventory
      *
      * @param e the inventory click event
@@ -67,7 +52,11 @@ public class ArenaListener implements Listener {
 
                     //Views the practice fighter inventory
                     if (e.getCurrentItem() != null && e.getCurrentItem().getType() == Material.PLAYER_HEAD) {
-                        Bukkit.dispatchCommand(practicePlayer.getSpigotPlayer(), "practiceinventory Mm7kTCD2 " + ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName()));
+
+                        PracticeArena practiceArena = PracticeMatchManager.getPracticeMatch(practicePlayer).get().getArena();
+                        UUID uuid = Bukkit.getOfflinePlayer(ChatColor.stripColor(e.getCurrentItem().getItemMeta().getDisplayName())).getUniqueId();
+
+                        Bukkit.dispatchCommand(practicePlayer.getSpigotPlayer(), "practiceinventory Mm7kTCD2 " + uuid + " " + practiceArena.getName());
                     }
                 }
             });
@@ -96,12 +85,12 @@ public class ArenaListener implements Listener {
     }
 
     /**
-     * Listens when a practice player is damaged during a practice match
+     * Listens when a practice player is damaged by a practice player during a practice match
      *
-     * @param e the player death event
+     * @param e the entity damage by entity event
      */
     @EventHandler
-    public void onDamage(EntityDamageByEntityEvent e) {
+    public void onDamageByEntity(EntityDamageByEntityEvent e) {
         if (e.getEntity() instanceof Player && e.getDamager() instanceof Player) {
             PracticePlayerManager.getPracticePlayer(e.getEntity().getUniqueId()).ifPresent(practiceVictim ->
                     PracticePlayerManager.getPracticePlayer(e.getDamager().getUniqueId()).ifPresent(practiceAttacker -> {
@@ -116,6 +105,29 @@ public class ArenaListener implements Listener {
                             }
                         }
                     }));
+        }
+    }
+
+    /**
+     * Listens when a practice spectator is damaged during a practice match
+     *
+     * @param e the entity damage event
+     */
+    @EventHandler
+    public void onDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player) {
+            PracticePlayerManager.getPracticePlayer(e.getEntity().getUniqueId()).ifPresent(practiceVictim -> {
+
+                //Checks if players is in a match
+                if (PracticeMatchManager.isInMatch(practiceVictim)) {
+                    PracticeMatch practiceMatch = PracticeMatchManager.getPracticeMatch(practiceVictim).get();
+
+                    //Checks if the victim is a spectator
+                    if (practiceMatch.isItSpectator(practiceVictim)) {
+                        e.setCancelled(true);
+                    }
+                }
+            });
         }
     }
 

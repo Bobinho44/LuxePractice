@@ -47,8 +47,6 @@ public class TeamDuel extends PracticeMatch {
         this.red.setName("Red Team");
         this.red.setColor(ChatColor.RED);
 
-        Stream.concat(blue.getMembers().stream(), red.getMembers().stream()).collect(Collectors.toSet()).forEach(this::addFighter);
-
         //Starts the practice match
         start();
     }
@@ -114,7 +112,7 @@ public class TeamDuel extends PracticeMatch {
     @Override
     public void start() {
         super.start();
-        for (PracticePlayer practicePlayer : getALlMembers()) {
+        for (PracticePlayer practicePlayer : Stream.concat(blue.getMembers().stream(), red.getMembers().stream()).collect(Collectors.toSet())) {
             practicePlayer.saveOldInventory();
             if (getBlueTeam().getMembers().contains(practicePlayer)) {
                 practicePlayer.teleport(getArena().getSpawn1());
@@ -124,6 +122,7 @@ public class TeamDuel extends PracticeMatch {
             }
             practicePlayer.removeAllPotionEffects();
             practicePlayer.changeName(PracticeTeamManager.getPracticeTeam(practicePlayer).get().getColor());
+            addFighter(practicePlayer);
             practicePlayer.sendMessage(getStartMessage(practicePlayer));
         }
     }
@@ -155,7 +154,7 @@ public class TeamDuel extends PracticeMatch {
 
         //Creates the start message
         return new ComponentBuilder("Teamfight starting vs ").color(ChatColor.GOLD).bold(true)
-                .append(PracticeTeamManager.getPracticeTeam(practiceReceiver).get().getLeader().getName()).color(ChatColor.YELLOW).bold(false)
+                .append((PracticeTeamManager.getPracticeTeam(practiceReceiver).get() == getBlueTeam() ? getRedTeam() : getBlueTeam()).getLeader().getName()).color(ChatColor.YELLOW).bold(false)
                 .append("'s team").color(ChatColor.GOLD).bold(true)
                 .append("\nBlue Team: ").color(ChatColor.BLUE).bold(true)
                 .append(getBlueTeam().getMembers().stream().map(PracticePlayer::getName).collect(Collectors.joining(", "))).bold(false)

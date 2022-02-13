@@ -55,6 +55,19 @@ public class PracticeMatchManager {
     }
 
     /**
+     * Gets a practice match with the practice arena
+     *
+     * @param practiceArena the practice arena
+     * @return the practice match
+     */
+    @Nonnull
+    public static Optional<PracticeMatch> getPracticeMatch(@Nonnull PracticeArena practiceArena) {
+        Validate.notNull(practiceArena, "practiceArena is null");
+
+        return getPracticeMatches().stream().filter(match -> match.getArena().equals(practiceArena)).findFirst();
+    }
+
+    /**
      * Checks if a practice player is in a practice match
      *
      * @param practicePlayer the practice player
@@ -168,6 +181,7 @@ public class PracticeMatchManager {
         //Saves inventory of practice spectators (not old practice fighters)
         if (!PracticeMatchManager.isInMatch(practiceViewer)) {
             practiceViewer.saveOldInventory();
+            practiceViewer.teleport(practiceMatch.getArena().getSpawn1());
         }
 
         //Adds practice player to the dead fighter list
@@ -179,9 +193,9 @@ public class PracticeMatchManager {
         practiceMatch.addSpectator(practiceViewer);
         practiceViewer.changeName(null);
         practiceViewer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999999, 1));
+        practiceViewer.heal();
         practiceViewer.setAllowFlight(true);
         PracticeKitManager.giveSpectatorPracticeKit(practiceViewer);
-        practiceViewer.teleport(practiceMatch.getArena().getSpawn1());
 
         //Checks if the match must be finished
         if (practiceMatch.mustFinish()) {
@@ -203,6 +217,7 @@ public class PracticeMatchManager {
         //Removes all practice spectators attributes
         practiceMatch.removeSpectator(practiceViewer);
         practiceViewer.removeAllPotionEffects();
+        practiceViewer.heal();
         practiceViewer.setAllowFlight(false);
         PracticeKitManager.givePracticeKit(practiceViewer, new PracticeKit("inventory", practiceViewer.getOldInventory()));
         practiceViewer.teleportToTheSpawn();

@@ -6,7 +6,11 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Single;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
+import fr.bobinho.luxepractice.utils.arena.PracticeArenaManager;
 import fr.bobinho.luxepractice.utils.arena.inventory.PracticeInventoryHolder;
+import fr.bobinho.luxepractice.utils.arena.match.PracticeMatch;
+import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
+import fr.bobinho.luxepractice.utils.player.PracticePlayerManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,7 +32,7 @@ public class PracticeInventoryCommand extends BaseCommand {
      */
     @Default
     @CommandPermission("luxepractice.practiceinventory")
-    public void onPracticeInventoryCommand(CommandSender commandSender, @Single String key, @Single OnlinePlayer streamer) {
+    public void onPracticeInventoryCommand(CommandSender commandSender, @Single String key, @Single String uuid, @Single String arena) {
         if (commandSender instanceof Player) {
             Player player = (Player) commandSender;
 
@@ -37,12 +41,18 @@ public class PracticeInventoryCommand extends BaseCommand {
                 return;
             }
 
-            //Checks if the uuid is valid
-            if (streamer != null) {
-                Inventory inventory = Bukkit.createInventory(new PracticeInventoryHolder(), InventoryType.PLAYER, Component.text(streamer.getPlayer().getName() + "'s inventory"));
-                inventory.setContents(streamer.getPlayer().getInventory().getContents());
-                player.openInventory(inventory);
+            //Gets practice match
+            PracticeMatch practiceMatch = PracticeMatchManager.getPracticeMatch(PracticeArenaManager.getPracticeArena(arena).get()).get();
+
+            //Creates the inventory
+            Inventory inventory = Bukkit.createInventory(new PracticeInventoryHolder(), InventoryType.PLAYER, Component.text(Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName() + "'s inventory"));
+
+            for (int i = 0; i < 36; i++) {
+                inventory.setItem(i, practiceMatch.getFighterInventory(UUID.fromString(uuid)).get()[i]);
             }
+
+            //Opens the inventory
+            player.openInventory(inventory);
         }
     }
 

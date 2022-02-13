@@ -73,9 +73,9 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>com.nametagedit</groupId>
-      <artifactId>nametagedit</artifactId>
-      <version>4.0.1</version>
+      <groupId>tab</groupId>
+      <artifactId>tab</artifactId>
+      <version>3.0.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

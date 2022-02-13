@@ -3,16 +3,15 @@ package fr.bobinho.luxepractice.utils.arena.match;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import fr.bobinho.luxepractice.utils.arena.PracticeArena;
+import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.apache.commons.lang.Validate;
+import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,7 @@ public abstract class PracticeMatch {
      */
     private final PracticeArena arena;
     private final Set<PracticePlayer> spectators = new HashSet<>();
-    private final List<PracticePlayer> fighters = new ArrayList<>();
+    private final Map<PracticePlayer, ItemStack[]> fighters = new HashMap<>();
     private final Set<PracticePlayer> deadFighter = new HashSet<>();
     private final Stopwatch duration;
     private boolean isFinished = false;
@@ -97,26 +96,23 @@ public abstract class PracticeMatch {
     }
 
     /**
-     * Gets the practice match fighter
+     * Gets the practice match fighters with their kit
+     *
+     * @return the practice match fighters with their kit
+     */
+    @Nonnull
+    public Map<PracticePlayer, ItemStack[]> getFightersWithKit() {
+        return fighters;
+    }
+
+    /**
+     * Gets the practice match fighters
      *
      * @return the practice match fighters
      */
     @Nonnull
     public List<PracticePlayer> getFighters() {
-        return fighters;
-    }
-
-    /**
-     * Checks if the practice player is a practice match fighters
-     *
-     * @param practicePlayer the practice player
-     * @return if he is a practice match fighters
-     */
-    public boolean isItFighter(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
-
-        return getFighters().contains(practicePlayer);
+        return new ArrayList<>(fighters.keySet());
     }
 
     /**
@@ -127,7 +123,33 @@ public abstract class PracticeMatch {
     public void addFighter(@Nonnull PracticePlayer practicePlayer) {
         Validate.notNull(practicePlayer, "practicePlayer is null");
 
-        getFighters().add(practicePlayer);
+        getFightersWithKit().put(practicePlayer, PracticeKitManager.getPracticePlayerInventoryAsKit(practicePlayer));
+    }
+
+    /**
+     * Gets the practice match fighter inventory
+     *
+     * @param practicePlayerUUID the practice fighter uuid
+     * @return the practice match fighter inventory
+     */
+    @Nonnull
+    public Optional<ItemStack[]> getFighterInventory(@Nonnull UUID practicePlayerUUID) {
+        Validate.notNull(practicePlayerUUID, "practicePlayerUUID is null");
+
+        return getFightersWithKit().entrySet().stream().filter(map -> map.getKey().getUuid().equals(practicePlayerUUID)).map(Map.Entry::getValue).findFirst();
+    }
+
+    /**
+     * Sets the practice fighter inventory
+     *
+     * @param practicePlayer the practice fighter
+     * @param items          the practice fighter inventory
+     */
+    public void setFighterInventory(@Nonnull PracticePlayer practicePlayer, @Nonnull ItemStack[] items) {
+        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Validate.notNull(items, "items is null");
+
+        getFightersWithKit().put(practicePlayer, items);
     }
 
     /**
@@ -193,7 +215,10 @@ public abstract class PracticeMatch {
         PracticeMatchManager.sendMessageToAllPlayerInMatch(getFinishMessage(), this);
         PracticeMatchManager.sendMessageToAllPlayerOutMatch(getBroadcastFinishMessage(), this);
         getFighters().stream().filter(practiceFighter -> !isItSpectator(practiceFighter)).collect(Collectors.toList())
+                .forEach(practiceFighter -> setFighterInventory(practiceFighter, PracticeKitManager.getPracticePlayerInventoryAsKit(practiceFighter)));
+        getFighters().stream().filter(practiceFighter -> !isItSpectator(practiceFighter)).collect(Collectors.toList())
                 .forEach(practiceFighter -> PracticeMatchManager.addSpectator(practiceFighter, practiceFighter));
+        getALlMembers().forEach(PracticeKitManager::giveSpectatorPracticeKit);
     }
 
     /**

@@ -1,23 +1,26 @@
 package fr.bobinho.luxepractice.utils.player;
 
-import com.nametagedit.plugin.NametagEdit;
-import com.nametagedit.plugin.api.data.Nametag;
 import fr.bobinho.luxepractice.LuxePracticeCore;
+import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
 import fr.bobinho.luxepractice.utils.format.PracticeNumberFormat;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.location.PracticeLocationUtil;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.team.TeamManager;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -231,6 +234,7 @@ public class PracticePlayer {
 
     /**
      * Gets the practice player nametag
+     *
      * @return the practice player nametag
      */
     @Nullable
@@ -240,6 +244,7 @@ public class PracticePlayer {
 
     /**
      * Sets the practice player nametag
+     *
      * @param nametag the practice player nametag
      */
     public void setNametag(String[] nametag) {
@@ -299,13 +304,12 @@ public class PracticePlayer {
 
         //Gets and teleports the player to the spawn
         Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, worldType + ":0:1000:0:0:0"));
-        if (spawn.getY() >= 1000) {
-            spawn.setY(spawn.getWorld().getHighestBlockYAt(spawn.getBlockX(), spawn.getBlockZ()) + 1);
-        }
         getSpigotPlayer().teleport(spawn);
 
         //Sends the message
-        sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
+        if (worldType.equalsIgnoreCase("world")) {
+            sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
+        }
     }
 
     /**
@@ -331,7 +335,9 @@ public class PracticePlayer {
      * @return the practice player active potion effects information
      */
     public List<String> getActivePotionEffectsInformation() {
-        return getSpigotPlayer().getActivePotionEffects().stream().map(potion -> ChatColor.YELLOW + potion.getType().getName().replace("_", " ")).collect(Collectors.toList());
+        return getSpigotPlayer().getActivePotionEffects().stream()
+                .filter(potion -> potion.getType() != PotionEffectType.INVISIBILITY)
+                .map(potion -> ChatColor.YELLOW + potion.getType().getName().replace("_", " ")).collect(Collectors.toList());
     }
 
     /**
@@ -341,6 +347,13 @@ public class PracticePlayer {
         for (PotionEffect effect : getSpigotPlayer().getActivePotionEffects()) {
             getSpigotPlayer().removePotionEffect(effect.getType());
         }
+    }
+
+    /**
+     * Heals the practice player
+     */
+    public void heal() {
+        getSpigotPlayer().setHealth(20);
     }
 
     /**
@@ -371,8 +384,11 @@ public class PracticePlayer {
      */
     @Nonnull
     public TextComponent getClickableInventoryAccessAsString() {
+
+        String arenaName = PracticeMatchManager.getPracticeMatch(this).get().getArena().getName();
+
         TextComponent clickableInventoryAccess = new TextComponent(getName());
-        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory Mm7kTCD2 " + getName()));
+        clickableInventoryAccess.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/practiceinventory Mm7kTCD2 " + getUuid() + " " + arenaName));
         return clickableInventoryAccess;
     }
 
@@ -409,13 +425,17 @@ public class PracticePlayer {
      * @param color the practice team color
      */
     public void changeName(@Nullable ChatColor color) {
+
+        TabPlayer tabPlayer = TabAPI.getInstance().getPlayer(getUuid());
+        TeamManager tabManager = TabAPI.getInstance().getTeamManager();
+
         if (color == null) {
-            NametagEdit.getApi().setNametag(getSpigotPlayer(), Objects.requireNonNull(getNametag())[0], getNametag()[1]);
-        }
-        else {
-            Nametag nametag = NametagEdit.getApi().getNametag(getSpigotPlayer());
-            setNametag(new String[]{nametag.getPrefix(), nametag.getSuffix()});
-            NametagEdit.getApi().setNametag(getSpigotPlayer(), color + "", "");
+            tabManager.setPrefix(tabPlayer, getNametag()[0]);
+            tabManager.setSuffix(tabPlayer, getNametag()[1]);
+        } else {
+            setNametag(new String[]{tabManager.getCustomPrefix(tabPlayer), tabManager.getCustomSuffix(tabPlayer)});
+            tabManager.setPrefix(tabPlayer, color + "");
+            tabManager.setSuffix(tabPlayer, "");
         }
     }
 

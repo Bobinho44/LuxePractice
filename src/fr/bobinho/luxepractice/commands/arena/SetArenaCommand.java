@@ -19,7 +19,7 @@ public class SetArenaCommand extends BaseCommand {
      * @param commandSender the sender
      */
     @Default
-    @Syntax("/setarena <name>")
+    @Syntax("/setarena <name> <location> <location>")
     @CommandPermission("luxepractice.setarena")
     public void onSetArenaCommand(CommandSender commandSender, @Single String arenaName, @Single String loc1, @Single String loc2) {
         if (commandSender instanceof Player) {

@@ -36,7 +36,7 @@ public class PracticeArenaManager {
      * @return the practice arena
      */
     @Nonnull
-    private static Optional<PracticeArena> getArena(@Nonnull String arenaName) {
+    public static Optional<PracticeArena> getPracticeArena(@Nonnull String arenaName) {
         Validate.notNull(arenaName, "name is null");
 
         return getPracticeArenas().stream().filter(arena -> arena.getName().equalsIgnoreCase(arenaName)).findFirst();
@@ -49,7 +49,7 @@ public class PracticeArenaManager {
      * @return if it is a practice arena
      */
     public static boolean isItPracticeArena(@Nonnull String arenaName) {
-        return getArena(arenaName).isPresent();
+        return getPracticeArena(arenaName).isPresent();
     }
 
     /**
@@ -71,7 +71,7 @@ public class PracticeArenaManager {
         Validate.notNull(arenaName, "name is null");
         Validate.isTrue(isItPracticeArena(arenaName), "arenaName is not valid");
 
-        getPracticeArenas().remove(getArena(arenaName).get());
+        getPracticeArenas().remove(getPracticeArena(arenaName).get());
     }
 
     /**

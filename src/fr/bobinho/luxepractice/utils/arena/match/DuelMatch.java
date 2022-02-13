@@ -46,8 +46,6 @@ public class DuelMatch extends PracticeMatch {
         this.fighter2 = fighter2;
         this.kit = kit;
 
-        List.of(fighter1, fighter2).forEach(this::addFighter);
-
         //Starts the practice match
         start();
     }
@@ -117,7 +115,7 @@ public class DuelMatch extends PracticeMatch {
     @Override
     public void start() {
         super.start();
-        for (PracticePlayer practicePlayer : getFighters()) {
+        for (PracticePlayer practicePlayer : List.of(fighter1, fighter2)) {
             practicePlayer.saveOldInventory();
             if (getFighter1().equals(practicePlayer)) {
                 practicePlayer.teleport(getArena().getSpawn1());
@@ -127,6 +125,7 @@ public class DuelMatch extends PracticeMatch {
             }
             practicePlayer.removeAllPotionEffects();
             PracticeKitManager.givePracticeKit(practicePlayer, getKit());
+            addFighter(practicePlayer);
             practicePlayer.sendMessage(getStartMessage(practicePlayer));
         }
     }

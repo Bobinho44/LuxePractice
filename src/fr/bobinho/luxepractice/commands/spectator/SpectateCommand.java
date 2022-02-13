@@ -27,7 +27,7 @@ public class SpectateCommand extends BaseCommand {
 
                 //Checks if the selected player is in an arena
                 if (!PracticeMatchManager.isInMatch(practiceReceiver)) {
-                    practiceSender.sendMessage(ChatColor.RED + practiceReceiver.getName() + "is not in an arena!");
+                    practiceSender.sendMessage(ChatColor.RED + practiceReceiver.getName() + " is not in an arena!");
                     return;
                 }
 
@@ -40,7 +40,7 @@ public class SpectateCommand extends BaseCommand {
                 PracticeMatchManager.addSpectator(practiceSender, practiceReceiver);
 
                 //Sends the message
-                practiceSender.sendMessage(ChatColor.GREEN + "You are watching the " + practiceReceiver.getName() + "match.");
+                practiceSender.sendMessage(ChatColor.YELLOW + "Now spectating " + ChatColor.GRAY + practiceReceiver.getName() + "'s " + ChatColor.YELLOW + "match...");
             }));
         }
     }

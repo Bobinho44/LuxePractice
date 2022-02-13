@@ -4,7 +4,7 @@ version: 0.0.1
 author: Bobinho
 api-version: 1.16
 depend:
-  - NametagEdit
+  - TAB
 commands:
   match:
     description: Match commands for LuxePractice.

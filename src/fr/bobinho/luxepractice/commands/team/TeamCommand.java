@@ -30,7 +30,7 @@ public class TeamCommand extends BaseCommand {
 
                 //Checks if the practice player has practice team
                 if (!PracticeTeamManager.hasPracticeTeam(practiceSender)) {
-                    practiceSender.sendMessage(ChatColor.RED + "You doesn't have a team!");
+                    practiceSender.sendMessage(ChatColor.RED + "You do not have a team!");
                     return;
                 }
 
