@@ -1,7 +1,6 @@
 package fr.bobinho.luxepractice.utils.settings;
 
 import fr.bobinho.luxepractice.LuxePracticeCore;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public class PracticeSettings {
 
@@ -21,7 +21,7 @@ public class PracticeSettings {
     private YamlConfiguration configuration;
 
     public PracticeSettings(@Nonnull String fileName) {
-        Validate.notNull(fileName, "fileName is null");
+        Objects.requireNonNull(fileName, "fileName is null");
 
         this.fileName = fileName;
         Initialize();

@@ -8,7 +8,6 @@ import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -38,9 +37,9 @@ public class DuelMatch extends PracticeMatch {
     public DuelMatch(@NotNull PracticeArena arena, @Nonnull PracticePlayer fighter1, @Nonnull PracticePlayer fighter2, @Nonnull PracticeKit kit) {
         super(arena);
 
-        Validate.notNull(fighter1, "fighter1 is null");
-        Validate.notNull(fighter2, "fighter2 is null");
-        Validate.notNull(kit, "kit is null");
+        Objects.requireNonNull(fighter1, "fighter1 is null");
+        Objects.requireNonNull(fighter2, "fighter2 is null");
+        Objects.requireNonNull(kit, "kit is null");
 
         this.fighter1 = fighter1;
         this.fighter2 = fighter2;
@@ -153,7 +152,7 @@ public class DuelMatch extends PracticeMatch {
     @Override
     @Nonnull
     public BaseComponent @NotNull [] getStartMessage(@Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceReceiver, "receiver is null");
+        Objects.requireNonNull(practiceReceiver, "receiver is null");
 
         //Creates the start message
         return new ComponentBuilder("Duel request accepted vs ").color(ChatColor.GOLD).bold(true)
@@ -170,7 +169,7 @@ public class DuelMatch extends PracticeMatch {
     @Override
     @Nonnull
     public BaseComponent[] getFinishMessage() {
-        Validate.notNull(getWinner(), "winner is null");
+        Objects.requireNonNull(getWinner(), "winner is null");
 
         //Creates the finish message
         return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
@@ -189,8 +188,8 @@ public class DuelMatch extends PracticeMatch {
     @Override
     @Nonnull
     public BaseComponent[] getBroadcastFinishMessage() {
-        Validate.notNull(getLooser(), "looser is null");
-        Validate.notNull(getWinner(), "winner is null");
+        Objects.requireNonNull(getLooser(), "looser is null");
+        Objects.requireNonNull(getWinner(), "winner is null");
 
         //Gets the broadcast finish message
         return new ComponentBuilder("[Duel] ").color(ChatColor.GOLD)

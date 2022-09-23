@@ -8,7 +8,6 @@ import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -37,8 +36,8 @@ public class TeamDuel extends PracticeMatch {
     public TeamDuel(@Nonnull PracticeArena arena, @Nonnull PracticeTeam blue, @Nonnull PracticeTeam red) {
         super(arena);
 
-        Validate.notNull(blue, "blue is null");
-        Validate.notNull(red, "red is null");
+        Objects.requireNonNull(blue, "blue is null");
+        Objects.requireNonNull(red, "red is null");
 
         this.blue = blue;
         this.blue.setName("Blue Team");
@@ -72,7 +71,7 @@ public class TeamDuel extends PracticeMatch {
     }
 
     private int getLivingPracticePlayerNumber(@Nonnull PracticeTeam practiceTeam) {
-        Validate.notNull(practiceTeam, "practiceTeam is null");
+        Objects.requireNonNull(practiceTeam, "practiceTeam is null");
 
         return (int) practiceTeam.getMembers().stream().filter(member -> !getDeadFighters().contains(member)).count();
     }
@@ -150,7 +149,7 @@ public class TeamDuel extends PracticeMatch {
     @Override
     @Nonnull
     public BaseComponent @NotNull [] getStartMessage(@Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceReceiver, "receiver is null");
+        Objects.requireNonNull(practiceReceiver, "receiver is null");
 
         //Creates the start message
         return new ComponentBuilder("Teamfight starting vs ").color(ChatColor.GOLD).bold(true)
@@ -171,7 +170,7 @@ public class TeamDuel extends PracticeMatch {
     @Override
     @Nonnull
     public BaseComponent[] getFinishMessage() {
-        Validate.notNull(getWinner(), "winner is null");
+        Objects.requireNonNull(getWinner(), "winner is null");
 
         //Creates the finish message
         return new ComponentBuilder("Winner: ").color(ChatColor.GOLD).bold(true)
@@ -190,7 +189,7 @@ public class TeamDuel extends PracticeMatch {
     @Override
     @Nonnull
     public BaseComponent[] getBroadcastFinishMessage() {
-        Validate.notNull(getWinner(), "winner is null");
+        Objects.requireNonNull(getWinner(), "winner is null");
 
         //Gets the broadcast finish message
         return new ComponentBuilder("[Teamfight] ").color(ChatColor.GOLD)

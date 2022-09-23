@@ -3,13 +3,13 @@ package fr.bobinho.luxepractice.utils.arena;
 import fr.bobinho.luxepractice.LuxePracticeCore;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
 import fr.bobinho.luxepractice.utils.location.PracticeLocationUtil;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class PracticeArenaManager {
@@ -37,7 +37,7 @@ public class PracticeArenaManager {
      */
     @Nonnull
     public static Optional<PracticeArena> getPracticeArena(@Nonnull String arenaName) {
-        Validate.notNull(arenaName, "name is null");
+        Objects.requireNonNull(arenaName, "name is null");
 
         return getPracticeArenas().stream().filter(arena -> arena.getName().equalsIgnoreCase(arenaName)).findFirst();
     }
@@ -60,16 +60,15 @@ public class PracticeArenaManager {
      * @param arenaName  the practice arena name
      */
     public static void createPracticeArena(@Nonnull Location arenaSpawn1, @Nonnull Location arenaSpawn2, @Nonnull String arenaName) {
-        Validate.notNull(arenaSpawn1, "arenaSpawn1 is null");
-        Validate.notNull(arenaSpawn2, "arenaSpawn2 is null");
-        Validate.notNull(arenaName, "arenaName is null");
+        Objects.requireNonNull(arenaSpawn1, "arenaSpawn1 is null");
+        Objects.requireNonNull(arenaSpawn2, "arenaSpawn2 is null");
+        Objects.requireNonNull(arenaName, "arenaName is null");
 
         getPracticeArenas().add(new PracticeArena(arenaSpawn1, arenaSpawn2, arenaName));
     }
 
     public static void deletePracticeArena(@Nonnull String arenaName) {
-        Validate.notNull(arenaName, "name is null");
-        Validate.isTrue(isItPracticeArena(arenaName), "arenaName is not valid");
+        Objects.requireNonNull(arenaName, "name is null");
 
         getPracticeArenas().remove(getPracticeArena(arenaName).get());
     }

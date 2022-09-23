@@ -1,9 +1,9 @@
 package fr.bobinho.luxepractice.utils.arena;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class PracticeArena {
 
@@ -21,9 +21,9 @@ public class PracticeArena {
      * @param name the practice arena name
      */
     public PracticeArena(@Nonnull Location spawn1, Location spawn2, @Nonnull String name) {
-        Validate.notNull(spawn1, "spawn1 is null");
-        Validate.notNull(spawn2, "spawn2 is null");
-        Validate.notNull(name, "name is null");
+        Objects.requireNonNull(spawn1, "spawn1 is null");
+        Objects.requireNonNull(spawn2, "spawn2 is null");
+        Objects.requireNonNull(name, "name is null");
 
         this.spawn1 = spawn1;
         this.spawn2 = spawn2;

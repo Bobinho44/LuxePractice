@@ -2,13 +2,9 @@ package fr.bobinho.luxepractice.utils.item;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.server.v1_16_R3.NBTBase;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -32,7 +28,7 @@ public class PracticeItemBuilder {
      * @param item the item stack
      */
     public PracticeItemBuilder(@Nonnull ItemStack item) {
-        Validate.notNull(item, "item is null");
+        Objects.requireNonNull(item, "item is null");
 
         //Configures the bukkit item stack
         this.item = item;
@@ -45,7 +41,7 @@ public class PracticeItemBuilder {
      * @param material the material
      */
     public PracticeItemBuilder(@Nonnull Material material) {
-        Validate.notNull(material, "material is null");
+        Objects.requireNonNull(material, "material is null");
 
         //Configures the bukkit item stack
         this.item = new ItemStack(material);
@@ -59,7 +55,7 @@ public class PracticeItemBuilder {
      * @param amount   the amount
      */
     public PracticeItemBuilder(@Nonnull Material material, int amount) {
-        Validate.notNull(material, "material is null");
+        Objects.requireNonNull(material, "material is null");
 
         //Configures the bukkit item stack
         this.item = new ItemStack(material, amount);
@@ -72,7 +68,7 @@ public class PracticeItemBuilder {
      * @param texture the texture
      */
     public PracticeItemBuilder(@Nonnull String texture) {
-        Validate.notNull(texture, "texture is null");
+        Objects.requireNonNull(texture, "texture is null");
 
         //Configures the bukkit item stack
         this.item = new ItemStack(Material.AIR, 1);
@@ -88,7 +84,7 @@ public class PracticeItemBuilder {
      * @param player the player for texturing
      */
     public PracticeItemBuilder(@Nonnull Player player) {
-        Validate.notNull(player, "player is null");
+        Objects.requireNonNull(player, "player is null");
 
         //Configures the bukkit item stack
         this.item = new ItemStack(Material.AIR, 1);
@@ -116,7 +112,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder item(@Nonnull ItemStack item) {
-        Validate.notNull(item, "item is null");
+        Objects.requireNonNull(item, "item is null");
 
         this.item = item;
         return this;
@@ -130,7 +126,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder material(@Nonnull Material material) {
-        Validate.notNull(material, "material is null");
+        Objects.requireNonNull(material, "material is null");
         item.setType(material);
         return this;
     }
@@ -175,7 +171,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder name(@Nonnull String name) {
-        Validate.notNull(name, "name is null");
+        Objects.requireNonNull(name, "name is null");
 
         meta.setDisplayName(name);
         item.setItemMeta(meta);
@@ -190,7 +186,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder setLore(@Nonnull List<String> lore) {
-        Validate.notNull(lore, "lore is null");
+        Objects.requireNonNull(lore, "lore is null");
 
         //Declares the lore
         List<String> lore_array = new ArrayList<>();
@@ -212,7 +208,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder lore(@Nonnull List<String> lore) {
-        Validate.notNull(lore, "lore is null");
+        Objects.requireNonNull(lore, "lore is null");
 
         //Declare the lore array.
         List<String> lore_array = meta.getLore();
@@ -241,7 +237,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder lore(@Nonnull String... lore) {
-        Validate.notNull(lore, "lore is null");
+        Objects.requireNonNull(lore, "lore is null");
 
         lore(new ArrayList<>(Arrays.asList(lore)));
         return this;
@@ -256,8 +252,8 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder lore(@Nonnull String color, @Nonnull List<String> lore) {
-        Validate.notNull(color, "color is null");
-        Validate.notNull(lore, "lore is null");
+        Objects.requireNonNull(color, "color is null");
+        Objects.requireNonNull(lore, "lore is null");
 
         //Declares the colorized lore
         List<String> colorizedLore = new ArrayList<>();
@@ -277,7 +273,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder enchantment(@Nonnull Enchantment enchantment, int level) {
-        Validate.notNull(enchantment, "enchantment is null");
+        Objects.requireNonNull(enchantment, "enchantment is null");
 
         item.addUnsafeEnchantment(enchantment, level);
         return this;
@@ -304,7 +300,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder flag(@Nonnull ItemFlag... flag) {
-        Validate.notNull(flag, "flag is null");
+        Objects.requireNonNull(flag, "flag is null");
 
         meta.addItemFlags(flag);
         item.setItemMeta(meta);
@@ -380,7 +376,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder texture(@Nonnull String texture, boolean url) {
-        Validate.notNull(texture, "texture is null");
+        Objects.requireNonNull(texture, "texture is null");
 
         //Checks if texture is empty
         if (texture.isEmpty()) {
@@ -431,7 +427,7 @@ public class PracticeItemBuilder {
      */
     @Nonnull
     public PracticeItemBuilder texture(@Nonnull Player player) {
-        Validate.notNull(player, "player is null");
+        Objects.requireNonNull(player, "player is null");
 
         //Gets the game profile
         GameProfile game_profile = ((CraftPlayer) player).getProfile();
@@ -455,52 +451,6 @@ public class PracticeItemBuilder {
         }
         texture(value, false);
 
-        return this;
-    }
-
-    /**
-     * Sets the item nbt tag
-     *
-     * @param nbtTag the nbt tag
-     * @return the practice item builder
-     */
-    @Nonnull
-    public PracticeItemBuilder nbt(@Nonnull NBTTagCompound nbtTag) {
-        Validate.notNull(nbtTag, "nbt tag is null");
-
-        //Declare the item stack as a nms copy
-        net.minecraft.server.v1_16_R3.ItemStack nms_item = CraftItemStack.asNMSCopy(item);
-
-        //Sets the item nbt tag
-        nms_item.setTag(nbtTag);
-
-        //Converts to the bukkit item stack
-        item = CraftItemStack.asCraftMirror(nms_item);
-        return this;
-    }
-
-    /**
-     * Sets the nbt key
-     *
-     * @param key  the key
-     * @param base the nbt base
-     * @return the practice item builder
-     */
-    @Nonnull
-    public PracticeItemBuilder nbt(@Nonnull String key, @Nonnull NBTBase base) {
-        Validate.notNull(key, "key is null");
-        Validate.notNull(base, "base is null");
-
-        //Declares the item stack as a nms copy
-        net.minecraft.server.v1_16_R3.ItemStack nms_item = CraftItemStack.asNMSCopy(this.item);
-        NBTTagCompound nbt_tag = nms_item.getOrCreateTag();
-
-        //Sets the key with base
-        nbt_tag.set(key, base);
-        nms_item.setTag(nbt_tag);
-
-        //Converts to the bukkit item stack
-        this.item = CraftItemStack.asBukkitCopy(nms_item);
         return this;
     }
 

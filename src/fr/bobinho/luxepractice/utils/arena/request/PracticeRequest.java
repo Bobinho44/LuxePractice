@@ -1,7 +1,6 @@
 package fr.bobinho.luxepractice.utils.arena.request;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
@@ -20,8 +19,8 @@ public class PracticeRequest {
      * @param practiceReceiver the practice receiver
      */
     public PracticeRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceSender, "practiceSender is null");
-        Validate.notNull(practiceReceiver, "practiceReceiver is null");
+        Objects.requireNonNull(practiceSender, "practiceSender is null");
+        Objects.requireNonNull(practiceReceiver, "practiceReceiver is null");
 
         this.practiceSender = practiceSender;
         this.practiceReceiver = practiceReceiver;

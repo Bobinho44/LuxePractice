@@ -3,7 +3,6 @@ package fr.bobinho.luxepractice.utils.player;
 import fr.bobinho.luxepractice.LuxePracticeCore;
 import fr.bobinho.luxepractice.utils.kit.PracticeKit;
 import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
-import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -36,7 +35,7 @@ public class PracticePlayerManager {
      */
     @Nonnull
     public static Optional<PracticePlayer> getPracticePlayer(@Nonnull UUID uuid) {
-        Validate.notNull(uuid, "uuid is null");
+        Objects.requireNonNull(uuid, "uuid is null");
 
         return getPracticePlayers().stream().filter(practicePlayer -> practicePlayer.getUuid().equals(uuid)).findFirst();
     }
@@ -48,7 +47,7 @@ public class PracticePlayerManager {
      * @return if it is a practice player
      */
     public static boolean isItPracticePlayer(@Nonnull UUID uuid) {
-        Validate.notNull(uuid, "uuid is null");
+        Objects.requireNonNull(uuid, "uuid is null");
 
         return getPracticePlayer(uuid).isPresent();
     }
@@ -64,9 +63,8 @@ public class PracticePlayerManager {
      */
     @Nonnull
     public static PracticePlayer registerPracticePlayer(@Nonnull UUID uuid, @Nonnull String name, int kills, int deaths) {
-        Validate.notNull(uuid, "uuid is null");
-        Validate.notNull(name, "name is null");
-        Validate.isTrue(!isItPracticePlayer(uuid), "player is already registered");
+        Objects.requireNonNull(uuid, "uuid is null");
+        Objects.requireNonNull(name, "name is null");
 
         PracticePlayer practicePlayer = new PracticePlayer(uuid, name, kills, deaths);
         getPracticePlayers().add(practicePlayer);
@@ -79,8 +77,7 @@ public class PracticePlayerManager {
      * @param player the player
      */
     public static void registerPracticePlayer(@Nonnull Player player) {
-        Validate.notNull(player, "player is null");
-        Validate.isTrue(!isItPracticePlayer(player.getUniqueId()), "player is already registered");
+        Objects.requireNonNull(player, "player is null");
 
         getPracticePlayers().add(new PracticePlayer(player));
     }
@@ -91,8 +88,7 @@ public class PracticePlayerManager {
      * @param practicePlayer the practice player
      */
     public static void unregisterPracticePlayer(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(isItPracticePlayer(practicePlayer.getUuid()), "practicePlayer is not registered");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getPracticePlayers().remove(practicePlayer);
     }
@@ -103,8 +99,7 @@ public class PracticePlayerManager {
      * @param player the player
      */
     public static void loadPracticePlayerData(@Nonnull Player player) {
-        Validate.notNull(player, "player is null");
-        Validate.isTrue(!isItPracticePlayer(player.getUniqueId()), "player is already registered");
+        Objects.requireNonNull(player, "player is null");
 
         YamlConfiguration configuration = LuxePracticeCore.getPlayersSettings().getConfiguration();
 
@@ -154,8 +149,7 @@ public class PracticePlayerManager {
      * @param uuid the practice player uuid
      */
     public static void savePracticePlayerData(@Nonnull UUID uuid) {
-        Validate.notNull(uuid, "uuid is null");
-        Validate.isTrue(isItPracticePlayer(uuid), "player is not registered");
+        Objects.requireNonNull(uuid, "uuid is null");
 
         YamlConfiguration configuration = LuxePracticeCore.getPlayersSettings().getConfiguration();
         configuration.set(uuid.toString(), null);

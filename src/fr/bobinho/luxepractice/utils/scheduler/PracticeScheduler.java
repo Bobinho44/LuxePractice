@@ -1,11 +1,11 @@
 package fr.bobinho.luxepractice.utils.scheduler;
 
 import fr.bobinho.luxepractice.LuxePracticeCore;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -37,7 +37,7 @@ public class PracticeScheduler {
      * @param type the type
      */
     public PracticeScheduler(@Nonnull Type type) {
-        Validate.notNull(type, "type is null");
+        Objects.requireNonNull(type, "type is null");
 
         //Root construction
         this.type = type;
@@ -85,7 +85,7 @@ public class PracticeScheduler {
      */
     @Nonnull
     public PracticeScheduler after(int delay, @Nonnull TimeUnit delayType) {
-        Validate.notNull(delayType, "delayType is null");
+        Objects.requireNonNull(delayType, "delayType is null");
 
         this.delay = delay;
         this.delayType = delayType;
@@ -114,7 +114,7 @@ public class PracticeScheduler {
      */
     @Nonnull
     public PracticeScheduler every(int repeatingDelay, @Nonnull TimeUnit repeatingDelayType) {
-        Validate.notNull(repeatingDelayType, "repeatingDelayType is null");
+        Objects.requireNonNull(repeatingDelayType, "repeatingDelayType is null");
 
         this.repeatingDelay = repeatingDelay;
         this.repeatingDelayType = repeatingDelayType;
@@ -138,7 +138,7 @@ public class PracticeScheduler {
      */
     @Nonnull
     public PracticeScheduler setCachedRunnable(@Nonnull Runnable cachedRunnable) {
-        Validate.notNull(cachedRunnable, "cachedRunnable is null!");
+        Objects.requireNonNull(cachedRunnable, "cachedRunnable is null!");
 
         this.cachedRunnable = cachedRunnable;
         return this;
@@ -181,7 +181,7 @@ public class PracticeScheduler {
      * @return the bukkit task id.
      */
     public synchronized int run(@Nonnull Runnable runnable) throws IllegalArgumentException {
-        Validate.notNull(runnable, "runnable is null");
+        Objects.requireNonNull(runnable, "runnable is null");
 
         long delay = delayType == null ? 0 : Math.max(delayType.toMillis(this.delay) / 50, 0);
         long repeating_delay = repeatingDelayType == null ? 0 : Math.max(repeatingDelayType.toMillis(repeatingDelay) / 50, 0);
@@ -220,7 +220,7 @@ public class PracticeScheduler {
      * @param task the bukkit task
      */
     public synchronized void run(@Nonnull Consumer<BukkitTask> task) throws IllegalArgumentException {
-        Validate.notNull(task, "task is null");
+        Objects.requireNonNull(task, "task is null");
 
         long delay = delayType == null ? 0 : Math.max(delayType.toMillis(this.delay) / 50, 0);
         long repeating_delay = repeatingDelayType == null ? 0 : Math.max(repeatingDelayType.toMillis(this.repeatingDelay) / 50, 0);

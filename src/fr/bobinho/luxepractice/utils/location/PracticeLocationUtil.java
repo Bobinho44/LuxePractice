@@ -1,10 +1,10 @@
 package fr.bobinho.luxepractice.utils.location;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 
 public class PracticeLocationUtil {
 
@@ -16,7 +16,7 @@ public class PracticeLocationUtil {
      */
     @Nonnull
     public static String getAsString(@Nonnull Location location) {
-        Validate.notNull(location, "location is null");
+        Objects.requireNonNull(location, "location is null");
 
         return location.getWorld().getName() + ":" +
                 location.getX() + ":" +
@@ -34,7 +34,7 @@ public class PracticeLocationUtil {
      */
     @Nonnull
     public static Location getAsLocation(@Nonnull String locationString) {
-        Validate.notNull(locationString, "locationString is null");
+        Objects.requireNonNull(locationString, "locationString is null");
 
         String[] locationInformations = locationString.split(":");
         return new Location(

@@ -1,11 +1,11 @@
 package fr.bobinho.luxepractice.utils.arena.team;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class PracticeTeamManager {
@@ -33,7 +33,7 @@ public class PracticeTeamManager {
      */
     @Nonnull
     public static Optional<PracticeTeam> getPracticeTeam(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return getPracticeTeams().stream().filter(team -> team.getMembers().contains(practicePlayer)).findFirst();
     }
@@ -45,8 +45,7 @@ public class PracticeTeamManager {
      * @return if it is a practice team leader
      */
     public static boolean isItPracticeTeamLeader(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return getPracticeTeam(practicePlayer).get().getLeader().equals(practicePlayer);
     }
@@ -58,7 +57,7 @@ public class PracticeTeamManager {
      * @return if it it a practice team member
      */
     public static boolean hasPracticeTeam(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return getPracticeTeam(practicePlayer).isPresent();
     }
@@ -69,8 +68,7 @@ public class PracticeTeamManager {
      * @param practicePlayer the practice team leader
      */
     public static void createPracticeTeam(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(!hasPracticeTeam(practicePlayer), "practicePlayer has already a practice team");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getPracticeTeams().add(new PracticeTeam(practicePlayer));
     }
@@ -81,8 +79,7 @@ public class PracticeTeamManager {
      * @param practicePlayer the practice team leader
      */
     public static void deletePracticeTeam(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(isItPracticeTeamLeader(practicePlayer), "practicePlayer is not a practice team leader");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getPracticeTeams().remove(getPracticeTeam(practicePlayer).get());
     }
@@ -93,9 +90,8 @@ public class PracticeTeamManager {
      * @param practicePlayer the practice team member
      */
     public static void joinPracticeTeam(@Nonnull PracticePlayer practicePlayer, @Nonnull PracticeTeam practiceTeam) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(practiceTeam, "practiceTeam is null");
-        Validate.isTrue(!hasPracticeTeam(practicePlayer), "practicePlayer already have a practice team");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practiceTeam, "practiceTeam is null");
 
         practiceTeam.addMember(practicePlayer);
     }
@@ -106,8 +102,7 @@ public class PracticeTeamManager {
      * @param practicePlayer the practice team member
      */
     public static void leavePracticeTeam(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getPracticeTeam(practicePlayer).get().removeMember(practicePlayer);
     }
@@ -119,9 +114,8 @@ public class PracticeTeamManager {
      * @param message        the message
      */
     public static void sendMessageToPracticeTeamMembers(@Nonnull PracticePlayer practicePlayer, @Nonnull String message) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(message, "message is null");
-        Validate.isTrue(hasPracticeTeam(practicePlayer), "practicePlayer doesn't have a practice team");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(message, "message is null");
 
         getPracticeTeam(practicePlayer).get().getMembers().forEach(practiceMember -> practiceMember.sendMessage(message));
     }

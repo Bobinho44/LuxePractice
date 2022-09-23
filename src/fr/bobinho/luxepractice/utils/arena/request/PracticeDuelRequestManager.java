@@ -2,11 +2,11 @@ package fr.bobinho.luxepractice.utils.arena.request;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
-import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -34,8 +34,8 @@ public class PracticeDuelRequestManager {
      * @return the practice duel request if found
      */
     private static Optional<PracticeRequest> getPracticeDuelRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceSender, "practiceSender is null");
-        Validate.notNull(practiceReceiver, "practiceReceiver is null");
+        Objects.requireNonNull(practiceSender, "practiceSender is null");
+        Objects.requireNonNull(practiceReceiver, "practiceReceiver is null");
 
         //Gets the selected practice duel request
         return getPracticeDuelRequests().stream().filter(request -> request.getPracticeSender().equals(practiceSender) && request.getPracticeReceiver().equals(practiceReceiver)).findFirst();
@@ -49,8 +49,8 @@ public class PracticeDuelRequestManager {
      * @return the status of the existence of the practice duel request
      */
     public static boolean isItPracticeDuelRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceSender, "practiceSender is null");
-        Validate.notNull(practiceReceiver, "practiceReceiver is null");
+        Objects.requireNonNull(practiceSender, "practiceSender is null");
+        Objects.requireNonNull(practiceReceiver, "practiceReceiver is null");
 
         //Checks if the select practice duel request exist
         return getPracticeDuelRequest(practiceSender, practiceReceiver).isPresent();
@@ -63,9 +63,8 @@ public class PracticeDuelRequestManager {
      * @param practiceReceiver the practice receiver
      */
     public static void sendPracticeDuelRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceSender, "practiceSender is null");
-        Validate.notNull(practiceReceiver, "practiceReceiver is null");
-        Validate.isTrue(!isItPracticeDuelRequest(practiceSender, practiceReceiver), "this request has already been sent");
+        Objects.requireNonNull(practiceSender, "practiceSender is null");
+        Objects.requireNonNull(practiceReceiver, "practiceReceiver is null");
 
         //Creates the practice duel request
         getPracticeDuelRequests().add(new PracticeRequest(practiceSender, practiceReceiver));
@@ -89,9 +88,8 @@ public class PracticeDuelRequestManager {
      * @param practiceReceiver the practice receiver
      */
     public static void removePracticeDuelRequest(@Nonnull PracticePlayer practiceSender, @Nonnull PracticePlayer practiceReceiver) {
-        Validate.notNull(practiceSender, "practiceSender is null");
-        Validate.notNull(practiceReceiver, "practiceReceiver is null");
-        Validate.isTrue(isItPracticeDuelRequest(practiceSender, practiceReceiver), "this request doesn't exist");
+        Objects.requireNonNull(practiceSender, "practiceSender is null");
+        Objects.requireNonNull(practiceReceiver, "practiceReceiver is null");
 
         //Removes the practice duel request
         getPracticeDuelRequests().remove(getPracticeDuelRequest(practiceSender, practiceReceiver).get());

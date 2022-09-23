@@ -7,7 +7,6 @@ import fr.bobinho.luxepractice.utils.kit.PracticeKitManager;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import fr.bobinho.luxepractice.utils.scheduler.PracticeScheduler;
 import net.md_5.bungee.api.chat.BaseComponent;
-import org.apache.commons.lang.Validate;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
@@ -33,7 +32,7 @@ public abstract class PracticeMatch {
      * @param arena the practice arena
      */
     public PracticeMatch(@Nonnull PracticeArena arena) {
-        Validate.notNull(arena, "arena is null");
+        Objects.requireNonNull(arena, "arena is null");
 
         this.arena = arena;
         this.duration = Stopwatch.createStarted();
@@ -66,8 +65,7 @@ public abstract class PracticeMatch {
      * @return if he is a practice match spectator
      */
     public boolean isItSpectator(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return getSpectators().contains(practicePlayer);
     }
@@ -78,7 +76,7 @@ public abstract class PracticeMatch {
      * @param practicePlayer the practice player
      */
     public void addSpectator(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getSpectators().add(practicePlayer);
     }
@@ -89,8 +87,7 @@ public abstract class PracticeMatch {
      * @param practicePlayer the practice player
      */
     public void removeSpectator(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getSpectators().remove(practicePlayer);
     }
@@ -121,7 +118,7 @@ public abstract class PracticeMatch {
      * @param practicePlayer the practice player
      */
     public void addFighter(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getFightersWithKit().put(practicePlayer, PracticeKitManager.getPracticePlayerInventoryAsKit(practicePlayer));
     }
@@ -134,7 +131,7 @@ public abstract class PracticeMatch {
      */
     @Nonnull
     public Optional<ItemStack[]> getFighterInventory(@Nonnull UUID practicePlayerUUID) {
-        Validate.notNull(practicePlayerUUID, "practicePlayerUUID is null");
+        Objects.requireNonNull(practicePlayerUUID, "practicePlayerUUID is null");
 
         return getFightersWithKit().entrySet().stream().filter(map -> map.getKey().getUuid().equals(practicePlayerUUID)).map(Map.Entry::getValue).findFirst();
     }
@@ -146,8 +143,8 @@ public abstract class PracticeMatch {
      * @param items          the practice fighter inventory
      */
     public void setFighterInventory(@Nonnull PracticePlayer practicePlayer, @Nonnull ItemStack[] items) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(items, "items is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(items, "items is null");
 
         getFightersWithKit().put(practicePlayer, items);
     }
@@ -168,7 +165,7 @@ public abstract class PracticeMatch {
      * @param practicePlayer the practice player
      */
     public void addDeadFighter(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getDeadFighters().add(practicePlayer);
     }

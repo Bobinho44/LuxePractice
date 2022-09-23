@@ -13,7 +13,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -50,10 +49,8 @@ public class PracticePlayer {
      * @param deaths the practice player deaths number
      */
     public PracticePlayer(@Nonnull UUID uuid, @Nonnull String name, int kills, int deaths) {
-        Validate.notNull(uuid, "uuid is null");
-        Validate.notNull(name, "name is null");
-        Validate.isTrue(kills >= 0, "kills is negative");
-        Validate.isTrue(deaths >= 0, "deaths is negative");
+        Objects.requireNonNull(uuid, "uuid is null");
+        Objects.requireNonNull(name, "name is null");
 
         this.uuid = uuid;
         this.name = name;
@@ -158,7 +155,7 @@ public class PracticePlayer {
      */
     @Nonnull
     public Optional<PracticeKit> getKit(String kitName) {
-        Validate.notNull(kitName, "kitname is null");
+        Objects.requireNonNull(kitName, "kitname is null");
 
         return getKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(kitName)).findFirst();
     }
@@ -169,7 +166,7 @@ public class PracticePlayer {
      * @param kit the kit
      */
     public void addKit(PracticeKit kit) {
-        Validate.notNull(kit, "kit is null");
+        Objects.requireNonNull(kit, "kit is null");
 
         getKits().add(kit);
     }
@@ -180,7 +177,7 @@ public class PracticePlayer {
      * @param kit the kit
      */
     public void removeKit(PracticeKit kit) {
-        Validate.notNull(kit, "kit is null");
+        Objects.requireNonNull(kit, "kit is null");
 
         getKits().remove(kit);
     }
@@ -227,7 +224,7 @@ public class PracticePlayer {
      * @param items the inventory items
      */
     public void saveOldInventory(@Nonnull ItemStack[] items) {
-        Validate.notNull(items, "items is null");
+        Objects.requireNonNull(items, "items is null");
 
         oldInventory = items;
     }
@@ -279,7 +276,7 @@ public class PracticePlayer {
      * @param inventory the inventory
      */
     public void openInventory(@Nonnull Inventory inventory) {
-        Validate.notNull(inventory, "inventory is null");
+        Objects.requireNonNull(inventory, "inventory is null");
 
         getSpigotPlayer().openInventory(inventory);
     }
@@ -290,7 +287,7 @@ public class PracticePlayer {
      * @param location the location
      */
     public void teleport(@Nonnull Location location) {
-        Validate.notNull(location, "location is null");
+        Objects.requireNonNull(location, "location is null");
 
         //Teleports the player to the location
         getSpigotPlayer().teleport(location);
@@ -300,7 +297,7 @@ public class PracticePlayer {
      * Teleports the practice player to a world spawn
      */
     public void teleportToTheSpawn(@Nonnull String worldType) {
-        Validate.notNull(worldType, "worldType is null");
+        Objects.requireNonNull(worldType, "worldType is null");
 
         //Gets and teleports the player to the spawn
         Location spawn = PracticeLocationUtil.getAsLocation(LuxePracticeCore.getMainSettings().getConfiguration().getString("spawn." + worldType, worldType + ":0:1000:0:0:0"));
@@ -362,7 +359,7 @@ public class PracticePlayer {
      * @param potionEffect the potion effect
      */
     public void addPotionEffect(@Nonnull PotionEffect potionEffect) {
-        Validate.notNull(potionEffect, "potionEffect is null");
+        Objects.requireNonNull(potionEffect, "potionEffect is null");
 
         getSpigotPlayer().addPotionEffect(potionEffect);
     }

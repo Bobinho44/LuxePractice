@@ -1,7 +1,6 @@
 package fr.bobinho.luxepractice.utils.arena.request;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,7 +31,7 @@ public class PracticeWaitListManager {
      */
     @Nullable
     public static Queue<PracticePlayer> getWaitList(@Nonnull String kitname) {
-        Validate.notNull(kitname, "kitname is null");
+        Objects.requireNonNull(kitname, "kitname is null");
 
         return getPracticeWaitList().get(kitname.toLowerCase());
     }
@@ -45,7 +44,7 @@ public class PracticeWaitListManager {
      */
     @Nonnull
     public static Optional<PracticePlayer> getPracticePlayerFromTheWaitList(@Nonnull String kitname) {
-        Validate.notNull(kitname, "kitname is null");
+        Objects.requireNonNull(kitname, "kitname is null");
 
         return Optional.ofNullable(getWaitList(kitname) == null ? null : getWaitList(kitname).poll());
     }
@@ -57,7 +56,7 @@ public class PracticeWaitListManager {
      * @return if it is in a practice wait list
      */
     public static boolean isAlreadyInThePracticeWaitList(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return getPracticeWaitList().values().stream().anyMatch(kit -> kit.contains(practicePlayer));
     }
@@ -69,7 +68,7 @@ public class PracticeWaitListManager {
      * @return if thee is a practice player in a wait list
      */
     public static boolean isThereAvailablePracticePlayer(@Nonnull String kitname) {
-        Validate.notNull(kitname, "kitname is null");
+        Objects.requireNonNull(kitname, "kitname is null");
 
         return getWaitList(kitname) != null && !getWaitList(kitname).isEmpty();
     }
@@ -81,9 +80,8 @@ public class PracticeWaitListManager {
      * @param kitname        the practice kit name associated with the practice wait list
      */
     public static void addPracticePlayerToTheWaitList(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitname) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(kitname, "kitname is null");
-        Validate.isTrue(!isAlreadyInThePracticeWaitList(practicePlayer), "practicePlayer is already in the wait list");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(kitname, "kitname is null");
 
         //Adds the practice player to a new practice wait list
         if (getWaitList(kitname) == null) {
@@ -100,8 +98,7 @@ public class PracticeWaitListManager {
      * @param practicePlayer the practice player
      */
     public static void removePracticePlayerToTheWaitList(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(isAlreadyInThePracticeWaitList(practicePlayer), "practicePlayer is not in a the wait list");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getPracticeWaitList().values().stream().filter(kit -> kit.contains(practicePlayer)).findFirst().get().remove(practicePlayer);
     }

@@ -5,7 +5,6 @@ import fr.bobinho.luxepractice.utils.arena.match.PracticeMatch;
 import fr.bobinho.luxepractice.utils.arena.match.PracticeMatchManager;
 import fr.bobinho.luxepractice.utils.item.PracticeItemUtils;
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
@@ -40,7 +39,7 @@ public class PracticeKitManager {
      */
     @Nonnull
     public static Optional<BasicPracticeKit> getBasicPracticeKit(@Nonnull String basicKitName) {
-        Validate.notNull(basicKitName, "basicKitName is null");
+        Objects.requireNonNull(basicKitName, "basicKitName is null");
 
         return getBasicPracticeKits().stream().filter(kit -> kit.getName().equalsIgnoreCase(basicKitName)).findFirst();
     }
@@ -62,7 +61,7 @@ public class PracticeKitManager {
      * @return if it is a basic practice kit
      */
     public static boolean isItBasicPracticeKit(@Nonnull String basicKitName) {
-        Validate.notNull(basicKitName, "basicKitName is null");
+        Objects.requireNonNull(basicKitName, "basicKitName is null");
 
         return getBasicPracticeKit(basicKitName).isPresent();
     }
@@ -75,9 +74,8 @@ public class PracticeKitManager {
      * @param isDefaultBasicKit if the basic practice kit is the new default basic practice kit
      */
     public static void createBasicPracticeKit(@Nonnull String basicKitName, ItemStack[] basicKitItems, boolean isDefaultBasicKit) {
-        Validate.notNull(basicKitName, "basicKitName is null");
-        Validate.notNull(basicKitItems, "basicKitItems is null");
-        Validate.isTrue(!isItBasicPracticeKit(basicKitName), "defaultKItName is already used");
+        Objects.requireNonNull(basicKitName, "basicKitName is null");
+        Objects.requireNonNull(basicKitItems, "basicKitItems is null");
 
         //Checks if there is already a default basic practice kit
         if (isDefaultBasicKit) {
@@ -99,8 +97,7 @@ public class PracticeKitManager {
      * @param basicKitName the basic practice kit name
      */
     public static void deleteBasicPracticeKit(@Nonnull String basicKitName) {
-        Validate.notNull(basicKitName, "basicKitName is null");
-        Validate.isTrue(isItBasicPracticeKit(basicKitName), "basicKitName is invalid");
+        Objects.requireNonNull(basicKitName, "basicKitName is null");
 
         getBasicPracticeKits().remove(getBasicPracticeKit(basicKitName).get());
     }
@@ -160,7 +157,7 @@ public class PracticeKitManager {
      * @return is there is empty practice kit slot
      */
     public static boolean haveEmptyPracticeKitSlot(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return practicePlayer.getKits().size() < 10;
     }
@@ -173,8 +170,8 @@ public class PracticeKitManager {
      * @return if it is a practice kit
      */
     public static boolean isItPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(kitName, "kitName is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(kitName, "kitName is null");
 
         return practicePlayer.getKits().stream().anyMatch(kit -> kit.getName().equalsIgnoreCase(kitName));
     }
@@ -186,10 +183,8 @@ public class PracticeKitManager {
      * @param kitName        the practice kit name
      */
     public static void createPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(kitName, "kitName is null");
-        Validate.isTrue(!isItPracticeKit(practicePlayer, kitName), "kitName is already used");
-        Validate.isTrue(haveEmptyPracticeKitSlot(practicePlayer), "practicePlayer have already 10 kits");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(kitName, "kitName is null");
 
         practicePlayer.addKit(new PracticeKit(kitName, getPracticePlayerInventoryAsKit(practicePlayer)));
     }
@@ -202,10 +197,8 @@ public class PracticeKitManager {
      * @param kitItems       the practice kit items
      */
     public static void createPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName, @Nonnull ItemStack[] kitItems) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(kitName, "kitName is null");
-        Validate.isTrue(!isItPracticeKit(practicePlayer, kitName), "kitName is already used");
-        Validate.isTrue(haveEmptyPracticeKitSlot(practicePlayer), "practicePlayer have already 10 kits");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(kitName, "kitName is null");
 
         practicePlayer.addKit(new PracticeKit(kitName, kitItems));
     }
@@ -217,9 +210,8 @@ public class PracticeKitManager {
      * @param kitName        the practice kit name
      */
     public static void deletePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(kitName, "kitName is null");
-        Validate.isTrue(isItPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(kitName, "kitName is null");
 
         //Gets the practice kit
         PracticeKit kit = practicePlayer.getKit(kitName).get();
@@ -243,7 +235,7 @@ public class PracticeKitManager {
      */
     @Nonnull
     public static ItemStack[] getPracticePlayerInventoryAsKit(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         //Gets the practice player inventory items
         ItemStack[] kitItems = new ItemStack[41];
@@ -260,9 +252,8 @@ public class PracticeKitManager {
      * @param kitName        the practice kit name
      */
     public static void givePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String kitName) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(kitName, "kitName is null");
-        Validate.isTrue(isItPracticeKit(practicePlayer, kitName), "this kit doesn't exist");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(kitName, "kitName is null");
 
         //Gives all practice kit items
         for (int i = 0; i < 41; i++) {
@@ -277,8 +268,8 @@ public class PracticeKitManager {
      * @param practiceKit    the practice kit
      */
     public static void givePracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull PracticeKit practiceKit) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(practiceKit, "practiceKit is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practiceKit, "practiceKit is null");
 
         //Gives all practice kit items
         for (int i = 0; i < 41; i++) {
@@ -293,7 +284,7 @@ public class PracticeKitManager {
      * @return if he has a practice auto kit
      */
     public static boolean haveAutoPracticeKit(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         return practicePlayer.getAutoKit().isPresent();
     }
@@ -305,10 +296,8 @@ public class PracticeKitManager {
      * @param autoKitName    the practice auto kit name
      */
     public static void setAutoPracticeKit(@Nonnull PracticePlayer practicePlayer, @Nonnull String autoKitName) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.notNull(autoKitName, "autoKitName is null");
-        Validate.isTrue(!haveAutoPracticeKit(practicePlayer), "practicePlayer already have an auto kit");
-        Validate.isTrue(isItPracticeKit(practicePlayer, autoKitName), "this kit doesn't exist");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(autoKitName, "autoKitName is null");
 
         practicePlayer.setAutoKit(practicePlayer.getKit(autoKitName).get());
     }
@@ -319,8 +308,8 @@ public class PracticeKitManager {
      * @param practicePlayer the practice player
      */
     public static void removeAutoPracticeKit(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(haveAutoPracticeKit(practicePlayer), "practicePlayer doesn't have an auto kit");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
+
 
         practicePlayer.setAutoKit(null);
     }
@@ -331,8 +320,7 @@ public class PracticeKitManager {
      * @param practicePlayer the practice player
      */
     public static void giveSpectatorPracticeKit(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
-        Validate.isTrue(PracticeMatchManager.isInMatch(practicePlayer), "practicePlayer is not in a match");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         PracticeMatch practiceMatch = PracticeMatchManager.getPracticeMatch(practicePlayer).get();
 

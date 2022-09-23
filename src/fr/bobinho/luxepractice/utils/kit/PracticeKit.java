@@ -1,10 +1,10 @@
 package fr.bobinho.luxepractice.utils.kit;
 
-import org.apache.commons.lang.Validate;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class PracticeKit {
 
@@ -21,8 +21,8 @@ public class PracticeKit {
      * @param items the practice kit items
      */
     public PracticeKit(@Nonnull String name, @Nonnull ItemStack[] items) {
-        Validate.notNull(name, "name is null");
-        Validate.notNull(items, "items is null");
+        Objects.requireNonNull(name, "name is null");
+        Objects.requireNonNull(items, "items is null");
 
         this.name = name;
         this.items = items;
@@ -56,8 +56,6 @@ public class PracticeKit {
      */
     @Nullable
     public ItemStack getItem(int slot) {
-        Validate.isTrue(slot >= 0 && slot < 41, "slot is invalid");
-
         return getItems()[slot];
     }
 

@@ -1,7 +1,6 @@
 package fr.bobinho.luxepractice.utils.chest;
 
 import fr.bobinho.luxepractice.utils.player.PracticePlayer;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
@@ -47,7 +46,6 @@ public class PracticeChestManager {
      */
     public static void createPracticeChest(@Nonnull Location location) {
         Objects.requireNonNull(location, "location is null");
-        Validate.isTrue(!isItPracticeChest(location), "chest is already a practice chest");
 
         getPracticeChests().add(location);
     }
@@ -58,7 +56,6 @@ public class PracticeChestManager {
      */
     public static void deletePracticeChest(@Nonnull Location location) {
         Objects.requireNonNull(location, "location is null");
-        Validate.isTrue(isItPracticeChest(location), "chest is not a practice chest");
 
         getPracticeChests().remove(location);
     }
@@ -71,7 +68,6 @@ public class PracticeChestManager {
     public static void openPracticeChest(@Nonnull PracticePlayer practicePlayer, @Nonnull Chest chest) {
         Objects.requireNonNull(practicePlayer, "practicePlayer is null");
         Objects.requireNonNull(chest, "chest is null");
-        Validate.isTrue(isItPracticeChest(chest.getLocation()), "chest is not a practice chest");
 
         Inventory practiceChestInventory = Bukkit.createInventory(null, chest.getInventory().getSize());
 

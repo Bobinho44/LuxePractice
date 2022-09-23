@@ -4,12 +4,12 @@ import fr.bobinho.luxepractice.utils.player.PracticePlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import org.apache.commons.lang.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class PracticeTeam {
@@ -28,7 +28,7 @@ public class PracticeTeam {
      * @param leader the practice team leader
      */
     public PracticeTeam(@Nonnull PracticePlayer leader) {
-        Validate.notNull(leader, "leader is null");
+        Objects.requireNonNull(leader, "leader is null");
 
         this.leader = leader;
         this.members = new ArrayList<>(List.of(leader));
@@ -60,7 +60,7 @@ public class PracticeTeam {
      * @param practicePlayer the new practice team member
      */
     public void addMember(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getMembers().add(practicePlayer);
     }
@@ -71,7 +71,7 @@ public class PracticeTeam {
      * @param practicePlayer the practice team player removed from the team
      */
     public void removeMember(@Nonnull PracticePlayer practicePlayer) {
-        Validate.notNull(practicePlayer, "practicePlayer is null");
+        Objects.requireNonNull(practicePlayer, "practicePlayer is null");
 
         getMembers().remove(practicePlayer);
     }
@@ -124,7 +124,7 @@ public class PracticeTeam {
      * @param name the practice team name
      */
     public void setName(@Nonnull String name) {
-        Validate.notNull(name, "name is null");
+        Objects.requireNonNull(name, "name is null");
 
         this.name = name;
     }
@@ -145,7 +145,7 @@ public class PracticeTeam {
      * @param color the practice team color
      */
     public void setColor(@Nonnull ChatColor color) {
-        Validate.notNull(color, "color is null");
+        Objects.requireNonNull(color, "color is null");
 
         this.color = color;
     }
